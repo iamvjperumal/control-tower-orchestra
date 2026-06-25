@@ -1,0 +1,19 @@
+{
+  "type": "record",
+  "name": "ShipmentDelayed",
+  "namespace": "signaltwin.events",
+  "fields": [
+    {"name": "event_id", "type": "string"},
+    {"name": "event_type", "type": "string", "default": "shipment-delayed"},
+    {"name": "event_time", "type": "string"},
+    {"name": "source_system", "type": "string"},
+    {"name": "customer_id", "type": "string"},
+    {"name": "order_id", "type": "string"},
+    {"name": "shipment_id", "type": "string"},
+    {"name": "carrier", "type": "string"},
+    {"name": "delay_hours", "type": "int"},
+    {"name": "reason", "type": "string"},
+    {"name": "original_eta", "type": "string"},
+    {"name": "revised_eta", "type": "string"}
+  ]
+}

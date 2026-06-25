@@ -1,0 +1,17 @@
+{
+  "type": "record",
+  "name": "FleetAgentDecision",
+  "namespace": "fleetops.events",
+  "doc": "AI agent recommendation output",
+  "fields": [
+    {"name": "decision_id", "type": "string"},
+    {"name": "agent_type", "type": "string"},
+    {"name": "vehicle_id", "type": "string"},
+    {"name": "severity", "type": "string"},
+    {"name": "reason", "type": "string"},
+    {"name": "recommended_action", "type": "string"},
+    {"name": "confidence", "type": "double"},
+    {"name": "generated_at", "type": "string", "doc": "ISO-8601"},
+    {"name": "status", "type": "string", "default": "pending"}
+  ]
+}

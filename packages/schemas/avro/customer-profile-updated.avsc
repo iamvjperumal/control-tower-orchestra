@@ -1,0 +1,17 @@
+{
+  "type": "record",
+  "name": "CustomerProfileUpdated",
+  "namespace": "signaltwin.events",
+  "fields": [
+    {"name": "event_id", "type": "string"},
+    {"name": "event_type", "type": "string", "default": "customer-profile-updated"},
+    {"name": "event_time", "type": "string"},
+    {"name": "source_system", "type": "string"},
+    {"name": "customer_id", "type": "string"},
+    {"name": "tier", "type": "string", "doc": "standard|premium|vip"},
+    {"name": "lifetime_value", "type": "double"},
+    {"name": "account_age_days", "type": "int"},
+    {"name": "region", "type": "string"},
+    {"name": "email_hash", "type": "string", "doc": "PII: hashed"}
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "type": "record",
+  "name": "FleetAuditEntry",
+  "namespace": "fleetops.events",
+  "doc": "Inference audit trail for fleet agent decisions",
+  "fields": [
+    {"name": "audit_id", "type": "string"},
+    {"name": "agent_type", "type": "string"},
+    {"name": "decision_id", "type": "string"},
+    {"name": "vehicle_id", "type": "string"},
+    {"name": "model_id", "type": "string"},
+    {"name": "prompt_hash", "type": "string", "doc": "SHA-256 of prompt — never store raw prompt"},
+    {"name": "input_context_hash", "type": "string"},
+    {"name": "confidence", "type": "double"},
+    {"name": "latency_ms", "type": "int"},
+    {"name": "timestamp", "type": "string", "doc": "ISO-8601"}
+  ]
+}

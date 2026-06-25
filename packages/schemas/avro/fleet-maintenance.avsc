@@ -1,0 +1,20 @@
+{
+  "type": "record",
+  "name": "FleetMaintenance",
+  "namespace": "fleetops.events",
+  "doc": "Vehicle maintenance signals and fault codes",
+  "fields": [
+    {"name": "event_id", "type": "string"},
+    {"name": "event_type", "type": "string"},
+    {"name": "event_time", "type": "string", "doc": "ISO-8601"},
+    {"name": "source_system", "type": "string"},
+    {"name": "vehicle_id", "type": "string"},
+    {"name": "fault_code", "type": ["null", "string"], "default": null},
+    {"name": "engine_temp_c", "type": "double"},
+    {"name": "oil_pressure_psi", "type": "double"},
+    {"name": "brake_wear_pct", "type": "double"},
+    {"name": "tire_pressure_psi", "type": {"type": "array", "items": "double"}},
+    {"name": "maintenance_risk_score", "type": "double"},
+    {"name": "description", "type": "string"}
+  ]
+}

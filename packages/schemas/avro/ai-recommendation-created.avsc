@@ -1,0 +1,20 @@
+{
+  "type": "record",
+  "name": "AIRecommendationCreated",
+  "namespace": "signaltwin.events",
+  "fields": [
+    {"name": "event_id", "type": "string"},
+    {"name": "event_type", "type": "string", "default": "ai-recommendation-created"},
+    {"name": "event_time", "type": "string"},
+    {"name": "source_system", "type": "string", "default": "signaltwin-ai"},
+    {"name": "customer_id", "type": "string"},
+    {"name": "risk_score", "type": "int"},
+    {"name": "action", "type": "string", "doc": "ESCALATE_FRAUD_REVIEW|VIP_RETENTION|REFUND_APPROVE|MONITOR|NO_ACTION"},
+    {"name": "reason", "type": {"type": "array", "items": "string"}},
+    {"name": "priority", "type": "string", "doc": "LOW|MEDIUM|HIGH|CRITICAL"},
+    {"name": "confidence", "type": "double"},
+    {"name": "model_id", "type": "string"},
+    {"name": "prompt_hash", "type": "string", "doc": "Hash of prompt sent to AI"},
+    {"name": "latency_ms", "type": "int"}
+  ]
+}

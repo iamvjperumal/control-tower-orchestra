@@ -1,0 +1,20 @@
+{
+  "type": "record",
+  "name": "FleetTelemetry",
+  "namespace": "fleetops.events",
+  "doc": "Vehicle telemetry reading from onboard sensors",
+  "fields": [
+    {"name": "event_id", "type": "string"},
+    {"name": "event_type", "type": "string", "default": "telemetry"},
+    {"name": "event_time", "type": "string", "doc": "ISO-8601"},
+    {"name": "source_system", "type": "string"},
+    {"name": "vehicle_id", "type": "string"},
+    {"name": "lat", "type": "double"},
+    {"name": "lng", "type": "double"},
+    {"name": "speed_kmh", "type": "double"},
+    {"name": "heading", "type": "int"},
+    {"name": "fuel_pct", "type": "double"},
+    {"name": "engine_temp_c", "type": "double"},
+    {"name": "odometer_km", "type": "double"}
+  ]
+}

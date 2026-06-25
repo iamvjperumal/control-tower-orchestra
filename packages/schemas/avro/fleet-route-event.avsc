@@ -1,0 +1,21 @@
+{
+  "type": "record",
+  "name": "FleetRouteEvent",
+  "namespace": "fleetops.events",
+  "doc": "Route planning and deviation events",
+  "fields": [
+    {"name": "event_id", "type": "string"},
+    {"name": "event_type", "type": "string"},
+    {"name": "event_time", "type": "string", "doc": "ISO-8601"},
+    {"name": "source_system", "type": "string"},
+    {"name": "vehicle_id", "type": "string"},
+    {"name": "route_id", "type": "string"},
+    {"name": "origin", "type": "string"},
+    {"name": "destination", "type": "string"},
+    {"name": "planned_eta", "type": "string"},
+    {"name": "current_eta", "type": "string"},
+    {"name": "eta_drift_minutes", "type": "int"},
+    {"name": "deviation_score", "type": "double"},
+    {"name": "distance_remaining_km", "type": "double"}
+  ]
+}

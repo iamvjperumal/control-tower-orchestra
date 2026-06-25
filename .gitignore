@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+
+# Environment
+.env
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Test / Coverage
+coverage/
+
+# Build tools
+.turbo/
+.cache/
+
+# Docker volumes
+postgres-data/
+
+# Package lock (optional — remove if you want to lock)
+# package-lock.json

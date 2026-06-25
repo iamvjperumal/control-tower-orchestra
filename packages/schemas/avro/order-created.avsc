@@ -1,0 +1,18 @@
+{
+  "type": "record",
+  "name": "OrderCreated",
+  "namespace": "signaltwin.events",
+  "fields": [
+    {"name": "event_id", "type": "string"},
+    {"name": "event_type", "type": "string", "default": "order-created"},
+    {"name": "event_time", "type": "string", "doc": "ISO-8601"},
+    {"name": "source_system", "type": "string"},
+    {"name": "customer_id", "type": "string"},
+    {"name": "order_id", "type": "string"},
+    {"name": "total_amount", "type": "double"},
+    {"name": "currency", "type": "string", "default": "USD"},
+    {"name": "item_count", "type": "int"},
+    {"name": "is_premium", "type": "boolean", "default": false},
+    {"name": "shipping_address_hash", "type": "string", "doc": "PII: hashed"}
+  ]
+}

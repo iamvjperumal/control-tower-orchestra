@@ -1,0 +1,18 @@
+{
+  "type": "record",
+  "name": "PaymentFailed",
+  "namespace": "signaltwin.events",
+  "fields": [
+    {"name": "event_id", "type": "string"},
+    {"name": "event_type", "type": "string", "default": "payment-failed"},
+    {"name": "event_time", "type": "string"},
+    {"name": "source_system", "type": "string"},
+    {"name": "customer_id", "type": "string"},
+    {"name": "order_id", "type": "string"},
+    {"name": "payment_id", "type": "string"},
+    {"name": "failure_code", "type": "string"},
+    {"name": "amount", "type": "double"},
+    {"name": "currency", "type": "string", "default": "USD"},
+    {"name": "attempt_number", "type": "int", "default": 1}
+  ]
+}

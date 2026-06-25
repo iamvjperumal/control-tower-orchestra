@@ -1,0 +1,27 @@
+{
+  "name": "signaltwin-ai",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "dev": "npm run dev:api & npm run dev:worker & npm run dev:dashboard",
+    "dev:api": "npm run dev --workspace=apps/api",
+    "dev:worker": "npm run dev --workspace=apps/worker",
+    "dev:dashboard": "npm run dev --workspace=apps/dashboard",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down -v",
+    "docker:build": "docker compose build",
+    "infra:up": "docker compose up -d zookeeper kafka schema-registry connect control-center postgres",
+    "infra:topics": "bash infra/confluent/create-topics.sh",
+    "infra:schemas": "bash infra/confluent/register-schemas.sh",
+    "setup": "npm install && npm run build --workspace=packages/core --workspace=packages/shared --workspace=packages/schemas",
+    "clean": "rm -rf node_modules apps/*/dist packages/*/dist"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  }
+}

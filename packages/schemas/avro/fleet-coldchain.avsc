@@ -1,0 +1,19 @@
+{
+  "type": "record",
+  "name": "FleetColdChain",
+  "namespace": "fleetops.events",
+  "doc": "Cold chain temperature and condition monitoring",
+  "fields": [
+    {"name": "event_id", "type": "string"},
+    {"name": "event_type", "type": "string"},
+    {"name": "event_time", "type": "string", "doc": "ISO-8601"},
+    {"name": "source_system", "type": "string"},
+    {"name": "vehicle_id", "type": "string"},
+    {"name": "compartment_id", "type": "string"},
+    {"name": "current_temp_c", "type": "double"},
+    {"name": "target_temp_c", "type": "double"},
+    {"name": "deviation_c", "type": "double"},
+    {"name": "door_open", "type": "boolean", "default": false},
+    {"name": "humidity_pct", "type": "double"}
+  ]
+}

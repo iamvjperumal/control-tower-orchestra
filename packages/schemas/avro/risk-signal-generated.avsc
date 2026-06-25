@@ -1,0 +1,17 @@
+{
+  "type": "record",
+  "name": "RiskSignalGenerated",
+  "namespace": "signaltwin.events",
+  "fields": [
+    {"name": "event_id", "type": "string"},
+    {"name": "event_type", "type": "string", "default": "risk-signal-generated"},
+    {"name": "event_time", "type": "string"},
+    {"name": "source_system", "type": "string", "default": "signaltwin-processor"},
+    {"name": "customer_id", "type": "string"},
+    {"name": "risk_score", "type": "int"},
+    {"name": "contributing_signals", "type": {"type": "array", "items": "string"}},
+    {"name": "window_start", "type": "string"},
+    {"name": "window_end", "type": "string"},
+    {"name": "related_order_ids", "type": {"type": "array", "items": "string"}}
+  ]
+}

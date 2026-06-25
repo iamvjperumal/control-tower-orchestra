@@ -1,0 +1,18 @@
+{
+  "type": "record",
+  "name": "SupportTicketUpdated",
+  "namespace": "signaltwin.events",
+  "fields": [
+    {"name": "event_id", "type": "string"},
+    {"name": "event_type", "type": "string", "default": "support-ticket-updated"},
+    {"name": "event_time", "type": "string"},
+    {"name": "source_system", "type": "string"},
+    {"name": "customer_id", "type": "string"},
+    {"name": "ticket_id", "type": "string"},
+    {"name": "channel", "type": "string", "doc": "chat|email|phone"},
+    {"name": "sentiment", "type": "string", "doc": "positive|neutral|negative"},
+    {"name": "sentiment_score", "type": "double"},
+    {"name": "category", "type": "string"},
+    {"name": "summary_hash", "type": "string", "doc": "PII: hashed summary"}
+  ]
+}

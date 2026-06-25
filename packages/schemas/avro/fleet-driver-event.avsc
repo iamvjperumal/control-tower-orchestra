@@ -1,0 +1,18 @@
+{
+  "type": "record",
+  "name": "FleetDriverEvent",
+  "namespace": "fleetops.events",
+  "doc": "Driver behavior and safety events",
+  "fields": [
+    {"name": "event_id", "type": "string"},
+    {"name": "event_type", "type": "string"},
+    {"name": "event_time", "type": "string", "doc": "ISO-8601"},
+    {"name": "source_system", "type": "string"},
+    {"name": "vehicle_id", "type": "string"},
+    {"name": "deceleration_g", "type": ["null", "double"], "default": null},
+    {"name": "acceleration_g", "type": ["null", "double"], "default": null},
+    {"name": "speed_kmh", "type": ["null", "double"], "default": null},
+    {"name": "speed_limit_kmh", "type": ["null", "double"], "default": null},
+    {"name": "fatigue_score", "type": ["null", "double"], "default": null}
+  ]
+}
