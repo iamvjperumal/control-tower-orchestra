@@ -7,6 +7,14 @@ A real-time AI decision platform built for the **2026 Confluent Hackathon**. CTO
 
 ---
 
+## 🎥 Demo
+
+[![CTO — Control Tower Orchestra — Live Demo](https://img.youtube.com/vi/pMSdUciQNas/maxresdefault.jpg)](https://www.youtube.com/watch?v=pMSdUciQNas)
+
+▶️ **[Watch the full demo on YouTube](https://www.youtube.com/watch?v=pMSdUciQNas)**
+
+---
+
 ## Platform Overview
 
 CTO is a **multi-domain control tower** that demonstrates how enterprises build a unified streaming platform for diverse use cases while maintaining governance, lineage, and compliance across all domains.
