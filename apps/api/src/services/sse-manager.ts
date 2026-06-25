@@ -30,3 +30,5 @@ class SSEManager {
 
 export const eventSSE = new SSEManager();
 export const recommendationSSE = new SSEManager();
+/** Dedicated SSE channel for live Stream Lineage pulses */
+export const lineageSSE = new SSEManager();

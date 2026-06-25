@@ -1,4 +1,4 @@
-import type { GovernanceDomain, TopicMetadata, PIIFieldMapping, DataContract, GovernanceMetrics, AgentInfo, LineageData } from '../types';
+import type { GovernanceDomain, TopicMetadata, PIIFieldMapping, DataContract, GovernanceMetrics, AgentInfo, LineageData, LineageStatsResponse } from '../types';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
@@ -31,6 +31,10 @@ export const api = {
   fetchGovernanceContracts: () => apiFetch<DataContract[]>('/governance/contracts'),
   fetchGovernanceMetrics: () => apiFetch<GovernanceMetrics>('/governance/metrics'),
   fetchGovernanceAgents: () => apiFetch<AgentInfo[]>('/governance/agents'),
+
+  // Stream Lineage — live stats and SSE
+  fetchLineageStats: () => apiFetch<LineageStatsResponse>('/governance/lineage/stats'),
+  lineageStreamUrl: `${API_URL}/governance/lineage/stream`,
 
   // Actions
   submitAction: (body: { recommendation_id: string; action_taken: string; operator_id: string }) =>

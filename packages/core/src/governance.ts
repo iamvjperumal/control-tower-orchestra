@@ -6,6 +6,7 @@ import type {
   PIIFieldMapping,
   TopicMetadata,
 } from './types.js';
+export type { LineageStatsResponse, TopicStats } from './types.js';
 import { registry } from './use-case-registry.js';
 
 export function getLineageForDomain(domain: string): LineageDefinition | null {

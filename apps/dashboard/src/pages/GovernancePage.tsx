@@ -5,9 +5,10 @@ import { SchemaViewer } from '../components/SchemaViewer';
 import { StreamCatalog } from '../components/StreamCatalog';
 import { ComplianceDashboard } from '../components/ComplianceDashboard';
 import { FlinkJobsViewer } from '../components/FlinkJobsViewer';
+import { StreamLineagePage } from './StreamLineagePage';
 import type { GovernanceDomain } from '../types';
 
-type Tab = 'catalog' | 'lineage' | 'schemas' | 'compliance' | 'flink';
+type Tab = 'catalog' | 'lineage' | 'stream-lineage' | 'schemas' | 'compliance' | 'flink';
 
 export function GovernancePage({ domain }: { domain?: string } = {}) {
   const [activeTab, setActiveTab] = useState<Tab>('catalog');
@@ -34,6 +35,7 @@ export function GovernancePage({ domain }: { domain?: string } = {}) {
 
   const tabs: { key: Tab; label: string; icon: React.ReactNode }[] = [
     { key: 'catalog', label: 'Stream Catalog', icon: <CatalogIcon /> },
+    { key: 'stream-lineage', label: 'Stream Lineage', icon: <StreamLineageIcon /> },
     { key: 'lineage', label: 'Data Lineage', icon: <LineageIcon /> },
     { key: 'schemas', label: 'Schema Registry', icon: <SchemaIcon /> },
     { key: 'compliance', label: 'Compliance', icon: <ComplianceIcon /> },
@@ -81,6 +83,8 @@ export function GovernancePage({ domain }: { domain?: string } = {}) {
 
       {/* Tab content */}
       {activeTab === 'catalog' && <StreamCatalog domain={domain} />}
+
+      {activeTab === 'stream-lineage' && <StreamLineagePage domain={domain} />}
 
       {activeTab === 'lineage' && <LineageGraph domain={domain} />}
 
@@ -143,6 +147,16 @@ function MiniStat({ label, value }: { label: string; value: number }) {
       <div className="text-sm font-bold" style={{ color: 'var(--text-primary)', fontFamily: 'var(--font-heading)' }}>{value}</div>
       <div className="text-[9px] font-semibold" style={{ color: 'var(--text-muted)' }}>{label}</div>
     </div>
+  );
+}
+
+function StreamLineageIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="5" cy="12" r="2" /><circle cx="12" cy="5" r="2" /><circle cx="12" cy="19" r="2" /><circle cx="19" cy="12" r="2" />
+      <line x1="7" y1="12" x2="10" y2="12" /><line x1="14" y1="12" x2="17" y2="12" />
+      <line x1="12" y1="7" x2="12" y2="10" /><line x1="12" y1="14" x2="12" y2="17" />
+    </svg>
   );
 }
 

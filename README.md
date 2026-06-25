@@ -1,553 +1,226 @@
 # CTO — Control Tower Orchestra
 
-**"CTO is the control tower for the AI era."**
+> **"The control tower for the AI era."**  
+> Every stream, every agent, and every decision passes through one trusted orchestration layer.
 
-Every stream, every agent, and every decision passes through one trusted orchestration layer.
+A real-time AI decision platform built for the **2026 Confluent Hackathon**. CTO provides a reusable event-driven backbone where any enterprise use case — fleet logistics, retail risk, healthcare, energy, telecom, or future domains — plugs into a single governed orchestration layer powered by **Confluent Cloud**, **Apache Flink SQL**, and **Stream Governance**.
 
 ---
 
-A real-time AI decision platform and governed orchestration engine built for the 2026 Confluent hackathon. CTO provides a reusable event-driven backbone where any enterprise use case — retail risk, fleet logistics, healthcare, energy, telecom, or future domains — plugs into a single governed orchestration layer powered by **Confluent Cloud**, **Apache Flink**, and **Stream Governance**.
+## Platform Overview
 
-## 🎯 Platform Overview
-
-CTO is a **multi-domain control tower** that demonstrates how enterprises can build a unified streaming platform for diverse use cases while maintaining governance, lineage, and compliance across all domains.
+CTO is a **multi-domain control tower** that demonstrates how enterprises build a unified streaming platform for diverse use cases while maintaining governance, lineage, and compliance across all domains.
 
 ### Shipped Use Cases
 
-1. **RetailOps Control Tower** — E-commerce risk, fraud detection, and VIP retention
-2. **FleetOps Control Tower** — Logistics operations with autonomous AI agents
+| # | Use Case | Domain | Topics | AI Agents |
+|---|----------|--------|--------|-----------|
+| 1 | **FleetOps Control Tower** | Logistics & last-mile | 13 | 4 |
+| 2 | **RetailOps Control Tower** | E-commerce risk & fraud | 14 | 2 |
 
 ### Additional Use Cases (Definitions Ready)
 
-3. **FinGuard** — Financial fraud detection and AML compliance
-4. **CareFlow** — Healthcare patient monitoring and care coordination
-5. **GridWatch** — Energy grid monitoring and demand forecasting
-6. **NetPulse** — Telecom network health and customer experience
-7. **FactoryGuardian** — Manufacturing quality control and predictive maintenance
+| # | Use Case | Domain |
+|---|----------|--------|
+| 3 | **FinGuard** | Financial fraud detection & AML |
+| 4 | **CareFlow** | Healthcare patient monitoring |
+| 5 | **GridWatch** | Energy grid monitoring |
+| 6 | **NetPulse** | Telecom network health |
+| 7 | **FactoryGuardian** | Manufacturing quality control |
 
 All use cases share the same **CTO Core Engine** for governance, lineage tracking, PII management, and schema evolution.
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
 ### System Overview
 
 ```mermaid
 graph TB
-    subgraph "Use Case Registry"
-        UCR[Use Case Registry<br/>packages/core]
-        RETAIL[RetailOps Definition<br/>14 topics, 2 agents]
-        FLEET[FleetOps Definition<br/>13 topics, 4 agents]
-        FUTURE[Future Use Cases<br/>Pluggable]
-        
-        UCR --> RETAIL
-        UCR --> FLEET
-        UCR --> FUTURE
+    subgraph INGESTION["Data Ingestion"]
+        direction LR
+        FG["Fleet Generators<br/>Telemetry · Route · ColdChain"]
+        RG["Retail Generators<br/>Order · Payment · Support"]
+        EXT["Connectors<br/>IoT · ERP · CRM"]
     end
-    
-    subgraph "Data Ingestion Layer"
-        RG[Retail Generators<br/>Order, Payment, Support]
-        FG[Fleet Generators<br/>Telemetry, Route, ColdChain]
-        EXT[External Systems<br/>Connectors]
-        
-        RG --> KAFKA
-        FG --> KAFKA
-        EXT --> KAFKA
-    end
-    
-    subgraph "Kafka Topics - 27 Total"
-        KAFKA[Apache Kafka<br/>Message Broker]
-        
-        subgraph "Retail Topics - 14"
-            R_RAW[Raw Layer<br/>orders, payments, support]
-            R_CLEAN[Curated Layer<br/>validated data]
-            R_ENRICH[Enriched Layer<br/>customer_360]
-            R_SIGNAL[Signals Layer<br/>risk.signals]
-            R_DEC[Decisions Layer<br/>recommendations]
-            R_ACT[Actions Layer<br/>agent_actions]
-            R_AUD[Audit Layer<br/>inference.audit]
+
+    subgraph CONFLUENT["Confluent Cloud"]
+        direction TB
+
+        subgraph TOPICS["Kafka Topics — 27 Total"]
+            direction LR
+            F_RAW["Fleet Raw (8)<br/>telemetry · routes · coldchain"]
+            R_RAW["Retail Raw (5)<br/>orders · payments · support"]
+            CURATED["Curated (4)<br/>clean · validated"]
+            ENRICHED["Enriched (1)<br/>customer_360"]
+            SIGNALS["Signals (3)<br/>risk · alerts · metrics"]
+            DECISIONS["Decisions (2)<br/>recommendations · decisions"]
+            ACTIONS["Actions (2)<br/>agent_actions"]
+            AUDIT["Audit (2)<br/>inference · log"]
         end
-        
-        subgraph "Fleet Topics - 13"
-            F_RAW[Raw Layer<br/>telemetry, routes, coldchain]
-            F_METRIC[Metrics Layer<br/>live metrics]
-            F_ALERT[Alerts Layer<br/>risk.alerts]
-            F_DEC[Decisions Layer<br/>agent.decisions]
-            F_ACT[Actions Layer<br/>agent.actions]
-            F_AUD[Audit Layer<br/>audit.log]
+
+        subgraph FLINK["Apache Flink SQL — 10 Jobs"]
+            direction LR
+            FL1["Validation<br/>clean-orders · clean-payments"]
+            FL2["Enrichment<br/>customer-360"]
+            FL3["Fleet Metrics<br/>vehicle aggregations"]
+            FL4["Risk Scoring<br/>windowed · multi-signal"]
+        end
+
+        subgraph GOVERNANCE["Stream Governance"]
+            direction LR
+            SR["Schema Registry<br/>16 Avro Schemas"]
+            DC["Data Contracts<br/>Compatibility Rules"]
+            PII["PII Classification<br/>HASH · REDACT · MASK"]
+            LIN["Stream Lineage<br/>Cross-Domain Graph"]
         end
     end
-    
-    subgraph "Stream Processing"
-        FLINK[Apache Flink SQL<br/>10 Scripts]
-        
-        subgraph "Retail Processing"
-            F_VALID[Validation<br/>clean-orders, clean-payments]
-            F_ENR[Enrichment<br/>customer-360]
-            F_RISK[Risk Computation<br/>windowed aggregations]
-        end
-        
-        subgraph "Fleet Processing"
-            F_METRICS[Metrics Computation<br/>vehicle metrics]
-            F_ALERTS[Alert Generation<br/>risk alerts]
-            F_ROUTE[Decision Routing<br/>agent decisions]
-        end
+
+    subgraph AGENTS["AI Processing"]
+        direction LR
+        FA1["Delay Agent"]
+        FA2["Cold Chain Agent"]
+        FA3["Safety Agent"]
+        FA4["Maintenance Agent"]
+        RA1["Risk Scorer"]
+        RA2["Recommendation Engine<br/>Claude API"]
     end
-    
-    subgraph "AI Processing Layer"
-        RISK[Risk Scorer<br/>Stateful Processing]
-        AI_ENG[AI Recommendation Engine<br/>Claude API]
-        
-        subgraph "Retail Agents - 2"
-            R_RISK[Risk Scorer]
-            R_AI[Recommendation Engine]
-        end
-        
-        subgraph "Fleet Agents - 4"
-            F_DELAY[Delay Agent]
-            F_COLD[Cold Chain Agent]
-            F_SAFE[Safety Agent]
-            F_MAINT[Maintenance Agent]
-        end
+
+    subgraph APP["Application Layer"]
+        direction LR
+        API["Fastify API<br/>REST + SSE"]
+        WORKER["Background Worker<br/>Generators + Agents"]
+        DASH["React Dashboard<br/>Real-Time UI"]
     end
-    
-    subgraph "Governance Layer"
-        SR[Schema Registry<br/>16 Avro Schemas]
-        DC[Data Contracts<br/>Compatibility Rules]
-        PII[PII Classification<br/>HASH/REDACT/MASK]
-        LIN[Lineage Tracking<br/>Cross-Domain Graph]
-        
-        SR --> DC
-        SR --> PII
-        SR --> LIN
-    end
-    
-    subgraph "API Layer"
-        API[Fastify API<br/>REST + SSE]
-        CONSUMER[Kafka Consumer<br/>Multi-Topic]
-        STATE[State Store<br/>In-Memory]
-        SSE[SSE Manager<br/>Real-Time Broadcast]
-        
-        CONSUMER --> STATE
-        STATE --> SSE
-        API --> SSE
-    end
-    
-    subgraph "Dashboard Layer"
-        DASH[React Dashboard<br/>Vite + Tailwind]
-        
-        subgraph "Retail Pages - 7"
-            R_DASH[Dashboard]
-            R_TWIN[Digital Twin]
-            R_GOV[Governance]
-            R_REPLAY[Event Replay]
-            R_EVENTS[Live Events]
-            R_REC[Recommendations]
-            R_CUST[Customers]
-        end
-        
-        subgraph "Fleet Pages - 6"
-            F_CTRL[Control Tower]
-            F_VEH[Vehicles]
-            F_DET[Vehicle Detail]
-            F_INC[Incidents]
-            F_AGENT[AI Agents]
-            F_GOV[Governance]
-        end
-        
-        subgraph "Shared Components"
-            COMP[LineageGraph<br/>StreamCatalog<br/>SchemaViewer<br/>ComplianceDashboard]
-        end
-    end
-    
-    %% Flow connections
-    KAFKA --> R_RAW
-    KAFKA --> F_RAW
-    
-    R_RAW --> FLINK
-    F_RAW --> FLINK
-    
-    FLINK --> R_CLEAN
-    FLINK --> R_ENRICH
-    FLINK --> F_METRIC
-    
-    R_ENRICH --> RISK
-    F_METRIC --> RISK
-    
-    RISK --> R_SIGNAL
-    RISK --> F_ALERT
-    
-    R_SIGNAL --> AI_ENG
-    F_ALERT --> AI_ENG
-    
-    AI_ENG --> R_DEC
-    AI_ENG --> F_DEC
-    
-    R_DEC --> CONSUMER
-    F_DEC --> CONSUMER
-    
-    R_AUD --> CONSUMER
-    F_AUD --> CONSUMER
-    
-    SSE --> DASH
-    
-    SR -.-> KAFKA
-    DC -.-> KAFKA
-    PII -.-> KAFKA
-    LIN -.-> DASH
-    
-    UCR -.-> API
-    UCR -.-> DASH
-    
-    style UCR fill:#e1f5ff
-    style KAFKA fill:#fff4e6
-    style FLINK fill:#f3e5f5
-    style AI_ENG fill:#e8f5e9
-    style SR fill:#fce4ec
-    style DASH fill:#e0f2f1
+
+    FG --> F_RAW
+    RG --> R_RAW
+    EXT --> F_RAW
+    EXT --> R_RAW
+
+    F_RAW --> FL3
+    R_RAW --> FL1
+    FL1 --> CURATED
+    CURATED --> FL2
+    FL2 --> ENRICHED
+    FL3 --> SIGNALS
+    FL4 --> SIGNALS
+    ENRICHED --> FL4
+
+    SIGNALS --> FA1
+    SIGNALS --> FA2
+    SIGNALS --> FA3
+    SIGNALS --> FA4
+    SIGNALS --> RA1
+    RA1 --> RA2
+
+    FA1 --> DECISIONS
+    FA2 --> DECISIONS
+    FA3 --> DECISIONS
+    FA4 --> DECISIONS
+    RA2 --> DECISIONS
+
+    DECISIONS --> ACTIONS
+    DECISIONS --> AUDIT
+
+    DECISIONS --> API
+    API --> DASH
+    WORKER --> F_RAW
+    WORKER --> R_RAW
+
+    SR -.->|validates| TOPICS
+    LIN -.->|traces| DASH
+
+    style CONFLUENT fill:#f8f9ff,stroke:#4f46e5,stroke-width:2px
+    style TOPICS fill:#fff8f0,stroke:#f59e0b,stroke-width:1px
+    style FLINK fill:#fdf4ff,stroke:#a855f7,stroke-width:1px
+    style GOVERNANCE fill:#f0fdf4,stroke:#22c55e,stroke-width:1px
+    style AGENTS fill:#fff1f2,stroke:#f43f5e,stroke-width:1px
+    style INGESTION fill:#f0f9ff,stroke:#0ea5e9,stroke-width:1px
+    style APP fill:#f8fafc,stroke:#64748b,stroke-width:1px
 ```
 
 ### Seven-Layer Data Flow
 
 ```mermaid
-flowchart TD
-    subgraph L1["Layer 1: Event Generation"]
-        GEN1[Mock Generators<br/>Scenario Orchestrator]
-        GEN2[External Systems<br/>Connectors]
-        GEN3[Real-Time Sources<br/>IoT Devices]
-    end
-    
-    subgraph L2["Layer 2: Raw Kafka Topics"]
-        RAW1[retail.orders.raw]
-        RAW2[retail.payments.raw]
-        RAW3[fleet.telemetry.raw]
-        RAW4[fleet.coldchain.raw]
-        RAW_MORE[... 23 more topics]
-    end
-    
-    subgraph L3["Layer 3: Stream Processing - Flink SQL"]
-        FLINK1[Validation<br/>Data Quality Checks]
-        FLINK2[Standardization<br/>Schema Normalization]
-        FLINK3[Enrichment<br/>Temporal Joins]
-        FLINK4[Windowed Aggregations<br/>10m, 24h windows]
-    end
-    
-    subgraph L4["Layer 4: Signal Generation"]
-        RISK1[Risk Scorer<br/>Stateful Processing]
-        RISK2[In-Memory State<br/>Customer/Vehicle State]
-        RISK3[Time Windows<br/>Event Correlation]
-        RISK4[Score Computation<br/>Multi-Signal Analysis]
-    end
-    
-    subgraph L5["Layer 5: AI Recommendation Layer"]
-        AI1[Action Determination<br/>Rule-Based Logic]
-        AI2[Claude API Call<br/>Contextual Explanation]
-        AI3[Confidence Scoring<br/>0.0 - 1.0]
-        AI4[Audit Trail<br/>Prompt Hash + Latency]
-    end
-    
-    subgraph L6["Layer 6: API & State Management"]
-        API1[Kafka Consumer<br/>Multi-Topic Subscribe]
-        API2[State Store<br/>In-Memory Cache]
-        API3[SSE Manager<br/>Real-Time Broadcast]
-        API4[REST Endpoints<br/>Query Interface]
-    end
-    
-    subgraph L7["Layer 7: Dashboard Visualization"]
-        DASH1[SSE Hooks<br/>Real-Time Updates]
-        DASH2[React Components<br/>Event Feed, Lineage]
-        DASH3[Governance Views<br/>Schema, PII, Contracts]
-        DASH4[Domain Routing<br/>Retail vs Fleet]
-    end
-    
-    GEN1 --> RAW1
-    GEN2 --> RAW2
-    GEN3 --> RAW3
-    
-    RAW1 --> FLINK1
-    RAW2 --> FLINK1
-    RAW3 --> FLINK1
-    RAW4 --> FLINK1
-    
-    FLINK1 --> FLINK2
-    FLINK2 --> FLINK3
-    FLINK3 --> FLINK4
-    
-    FLINK4 --> RISK1
-    RISK1 --> RISK2
-    RISK2 --> RISK3
-    RISK3 --> RISK4
-    
-    RISK4 --> AI1
-    AI1 --> AI2
-    AI2 --> AI3
-    AI3 --> AI4
-    
-    AI4 --> API1
-    API1 --> API2
-    API2 --> API3
-    API3 --> API4
-    
-    API3 --> DASH1
-    API4 --> DASH1
-    DASH1 --> DASH2
-    DASH2 --> DASH3
-    DASH3 --> DASH4
-    
-    style L1 fill:#e3f2fd
-    style L2 fill:#fff3e0
-    style L3 fill:#f3e5f5
-    style L4 fill:#e8f5e9
-    style L5 fill:#fce4ec
-    style L6 fill:#fff9c4
-    style L7 fill:#e0f2f1
+flowchart LR
+    L1["**Layer 1**<br/>Event Generation<br/>──────────<br/>Mock Generators<br/>IoT Sensors<br/>Connectors"]
+    L2["**Layer 2**<br/>Raw Kafka Topics<br/>──────────<br/>fleet.telemetry.raw<br/>retail.orders.raw<br/>+25 more topics"]
+    L3["**Layer 3**<br/>Flink SQL<br/>──────────<br/>Validation<br/>Enrichment<br/>Aggregation"]
+    L4["**Layer 4**<br/>Signal Generation<br/>──────────<br/>Risk Scoring<br/>Windowed Events<br/>State Correlation"]
+    L5["**Layer 5**<br/>AI Agents<br/>──────────<br/>Decision Logic<br/>Claude API<br/>Confidence Scoring"]
+    L6["**Layer 6**<br/>API + State<br/>──────────<br/>Kafka Consumer<br/>SSE Broadcast<br/>REST Endpoints"]
+    L7["**Layer 7**<br/>Dashboard<br/>──────────<br/>Real-Time UI<br/>Lineage Graph<br/>Governance Views"]
+
+    L1 --> L2 --> L3 --> L4 --> L5 --> L6 --> L7
+
+    style L1 fill:#dbeafe,stroke:#3b82f6,stroke-width:1px,color:#1e3a5f
+    style L2 fill:#fef3c7,stroke:#f59e0b,stroke-width:1px,color:#78350f
+    style L3 fill:#f3e8ff,stroke:#a855f7,stroke-width:1px,color:#4a044e
+    style L4 fill:#dcfce7,stroke:#22c55e,stroke-width:1px,color:#14532d
+    style L5 fill:#ffe4e6,stroke:#f43f5e,stroke-width:1px,color:#881337
+    style L6 fill:#fefce8,stroke:#eab308,stroke-width:1px,color:#713f12
+    style L7 fill:#e0f2fe,stroke:#0284c7,stroke-width:1px,color:#0c4a6e
 ```
 
 ### Technology Stack
 
 ```mermaid
 graph LR
-    subgraph "Frontend Stack"
-        REACT[React 19<br/>UI Framework]
-        VITE[Vite<br/>Build Tool]
-        TAIL[Tailwind CSS v4<br/>Styling]
-        SSE_FE[SSE Hooks<br/>Real-Time Updates]
+    subgraph FE["Frontend"]
+        REACT["React 19"]
+        VITE["Vite"]
+        TAILWIND["Tailwind CSS v4"]
     end
-    
-    subgraph "Backend Stack"
-        NODE[Node.js 22+<br/>Runtime]
-        FAST[Fastify 5<br/>API Framework]
-        TS[TypeScript<br/>Language]
-        KAFKA_JS[KafkaJS<br/>Client Library]
+
+    subgraph BE["Backend"]
+        NODE["Node.js 22+"]
+        FASTIFY["Fastify 5"]
+        TS["TypeScript"]
+        KJS["KafkaJS"]
     end
-    
-    subgraph "AI Stack"
-        CLAUDE[Claude Sonnet 4<br/>LLM]
-        ANTHROPIC[Anthropic API<br/>SDK]
-        PROMPT[Prompt Engineering<br/>Context Management]
+
+    subgraph AI["AI / LLM"]
+        CLAUDE["Claude Sonnet 4"]
+        WATSON["IBM WatsonX"]
     end
-    
-    subgraph "Streaming Stack"
-        KAFKA_INFRA[Apache Kafka 7.9.0<br/>Message Broker]
-        ZK[Zookeeper<br/>Coordination]
-        SR_INFRA[Schema Registry 7.9.0<br/>Schema Management]
-        FLINK_INFRA[Apache Flink SQL<br/>Stream Processing]
-        CONNECT[Kafka Connect<br/>Connectors]
+
+    subgraph INFRA["Confluent Cloud"]
+        KAFKA["Apache Kafka 7.9"]
+        FLINK_TECH["Flink SQL"]
+        SCHEMA["Schema Registry"]
+        CONNECT_TECH["Kafka Connect"]
     end
-    
-    subgraph "Data Stack"
-        PG[PostgreSQL 17<br/>Relational DB]
-        MEM[In-Memory State<br/>State Store]
-        AVRO[Avro Schemas<br/>Serialization]
+
+    subgraph DATA["Data"]
+        AVRO["Avro Schemas"]
+        PG["PostgreSQL 17"]
+        MEM["In-Memory State"]
     end
-    
-    subgraph "DevOps Stack"
-        DOCKER[Docker<br/>Containerization]
-        COMPOSE[Docker Compose<br/>Orchestration]
-        NPM[npm Workspaces<br/>Monorepo]
-    end
-    
-    REACT --> VITE
-    VITE --> TAIL
-    REACT --> SSE_FE
-    
-    NODE --> FAST
-    FAST --> TS
-    TS --> KAFKA_JS
-    
-    CLAUDE --> ANTHROPIC
-    ANTHROPIC --> PROMPT
-    
-    KAFKA_INFRA --> ZK
-    KAFKA_INFRA --> SR_INFRA
-    KAFKA_INFRA --> FLINK_INFRA
-    KAFKA_INFRA --> CONNECT
-    
-    PG --> MEM
-    SR_INFRA --> AVRO
-    
-    DOCKER --> COMPOSE
-    COMPOSE --> NPM
-    
-    SSE_FE -.-> FAST
-    KAFKA_JS -.-> KAFKA_INFRA
-    PROMPT -.-> FAST
-    AVRO -.-> KAFKA_INFRA
-    
-    style REACT fill:#61dafb
-    style NODE fill:#68a063
-    style CLAUDE fill:#d97757
-    style KAFKA_INFRA fill:#231f20
-    style PG fill:#336791
-    style DOCKER fill:#2496ed
+
+    FE --> BE
+    BE --> INFRA
+    BE --> AI
+    INFRA --> DATA
+
+    style FE fill:#dbeafe,stroke:#3b82f6,stroke-width:1px
+    style BE fill:#dcfce7,stroke:#22c55e,stroke-width:1px
+    style AI fill:#ffe4e6,stroke:#f43f5e,stroke-width:1px
+    style INFRA fill:#fef3c7,stroke:#f59e0b,stroke-width:1px
+    style DATA fill:#f3e8ff,stroke:#a855f7,stroke-width:1px
 ```
 
 ---
 
-## 📦 Repository Structure
-
-```
-SignalTwinAI/
-├── package.json                  # Root workspace config
-├── tsconfig.base.json            # Shared TypeScript config
-├── docker-compose.yml            # Local infrastructure (optional)
-├── .env.example                  # Environment template
-│
-├── packages/
-│   ├── core/                     # 🎯 CTO Core Engine
-│   │   └── src/
-│   │       ├── types.ts          # UseCaseDefinition, DomainTopics, GovernanceMetrics
-│   │       ├── use-case-registry.ts  # Domain registration and lookup
-│   │       ├── governance.ts     # Cross-domain lineage, PII report, data contracts
-│   │       ├── generic-processor.ts  # Kafka consumer factory
-│   │       ├── generic-state-store.ts # Domain-parameterized state store
-│   │       └── definitions/
-│   │           ├── retail.ts     # RetailOps: topics, scoring, lineage, schemas, PII
-│   │           ├── fleet.ts      # FleetOps: topics, agents, lineage, schemas, PII
-│   │           ├── finguard.ts   # Financial fraud detection
-│   │           ├── careflow.ts   # Healthcare monitoring
-│   │           ├── gridwatch.ts  # Energy grid management
-│   │           ├── netpulse.ts   # Telecom network health
-│   │           └── factory-guardian.ts # Manufacturing quality
-│   │
-│   ├── shared/                   # Shared types, constants, Kafka client
-│   │   └── src/
-│   │       ├── types.ts          # Event interfaces (all domains)
-│   │       ├── constants.ts      # Topic names, risk weights, thresholds
-│   │       └── kafka.ts          # KafkaJS client factory
-│   │
-│   ├── schemas/                  # Avro schemas for all event types
-│   │   └── avro/                 # 16 .avsc schema files (7 retail + 9 fleet)
-│   │
-│   └── streaming/
-│       └── flink-sql/            # Flink SQL scripts
-│           ├── 01-create-source-tables.sql      # Retail source tables
-│           ├── 02-clean-orders.sql              # Data cleansing
-│           ├── 03-clean-payments.sql            # Payment validation
-│           ├── 04-customer-360.sql              # Customer enrichment
-│           ├── 05-risk-signals.sql              # Risk scoring
-│           ├── 06-decisions.sql                 # Decision routing
-│           ├── 10-fleet-source-tables.sql       # Fleet source tables
-│           ├── 11-fleet-metrics.sql             # Fleet aggregations
-│           ├── 12-fleet-risk-alerts.sql         # Fleet alerts
-│           └── 13-fleet-agent-decisions.sql     # Agent decisions
-│
-├── apps/
-│   ├── api/                      # Fastify 5 API server
-│   │   └── src/
-│   │       ├── index.ts          # Server entrypoint
-│   │       ├── config.ts         # Configuration
-│   │       ├── routes/           # REST + SSE endpoints
-│   │       │   ├── health.ts     # Health check
-│   │       │   ├── events.ts     # Event streaming (SSE)
-│   │       │   ├── recommendations.ts # AI recommendations
-│   │       │   ├── customers.ts  # Customer data
-│   │       │   ├── actions.ts    # Operator actions
-│   │       │   ├── governance.ts # Governance endpoints (11 routes)
-│   │       │   ├── copilot.ts    # AI copilot chat
-│   │       │   ├── replay.ts     # Event replay
-│   │       │   └── fleet.ts      # Fleet operations
-│   │       └── services/
-│   │           ├── sse-manager.ts      # Server-Sent Events
-│   │           ├── kafka-consumer.ts   # Kafka consumer
-│   │           ├── kafka-producer.ts   # Kafka producer
-│   │           └── state-store.ts      # In-memory state
-│   │
-│   ├── worker/                   # Background worker
-│   │   └── src/
-│   │       ├── index.ts          # Worker entrypoint
-│   │       ├── config.ts         # Configuration
-│   │       ├── generators/       # Mock event generators
-│   │       │   ├── customer-generator.ts
-│   │       │   ├── order-generator.ts
-│   │       │   ├── payment-generator.ts
-│   │       │   ├── support-generator.ts
-│   │       │   ├── shipment-generator.ts
-│   │       │   ├── scenario-orchestrator.ts
-│   │       │   ├── fleet-telemetry-generator.ts
-│   │       │   ├── fleet-driver-generator.ts
-│   │       │   ├── fleet-route-generator.ts
-│   │       │   ├── fleet-coldchain-generator.ts
-│   │       │   ├── fleet-maintenance-generator.ts
-│   │       │   └── fleet-scenario-orchestrator.ts
-│   │       ├── processors/       # Stream processors
-│   │       │   ├── risk-scorer.ts
-│   │       │   ├── recommendation-engine.ts
-│   │       │   ├── fleet-delay-agent.ts
-│   │       │   ├── fleet-coldchain-agent.ts
-│   │       │   ├── fleet-safety-agent.ts
-│   │       │   └── fleet-maintenance-agent.ts
-│   │       └── services/
-│   │           ├── kafka-producer.ts
-│   │           ├── claude-client.ts
-│   │           └── watsonx-client.ts
-│   │
-│   └── dashboard/                # React 19 dashboard
-│       └── src/
-│           ├── App.tsx           # Main app with routing
-│           ├── main.tsx          # Entry point
-│           ├── app.css           # Tailwind CSS v4
-│           ├── pages/            # All dashboard pages
-│           │   ├── CaseSelectorPage.tsx        # Use case selector
-│           │   ├── DashboardPage.tsx           # Main dashboard
-│           │   ├── CustomerDetailPage.tsx      # Customer details
-│           │   ├── DigitalTwinPage.tsx         # Digital twin view
-│           │   ├── GovernancePage.tsx          # Governance dashboard
-│           │   ├── ReplayPage.tsx              # Event replay
-│           │   └── fleet/
-│           │       ├── FleetDashboardPage.tsx  # Fleet control tower
-│           │       ├── FleetVehiclesPage.tsx   # Vehicle list
-│           │       ├── FleetVehicleDetailPage.tsx # Vehicle details
-│           │       ├── FleetIncidentsPage.tsx  # Incidents
-│           │       └── FleetAgentsPage.tsx     # AI agents
-│           ├── components/       # Reusable components
-│           │   ├── LineageGraph.tsx
-│           │   ├── StreamCatalog.tsx
-│           │   ├── ComplianceDashboard.tsx
-│           │   ├── SchemaViewer.tsx
-│           │   ├── EventFeed.tsx
-│           │   ├── CopilotPanel.tsx
-│           │   ├── ReplayPanel.tsx
-│           │   ├── RiskGauge.tsx
-│           │   ├── RecommendationCard.tsx
-│           │   └── ActionButtons.tsx
-│           ├── hooks/
-│           │   ├── useSSE.ts     # Server-Sent Events hook
-│           │   └── useRecommendations.ts
-│           └── api/
-│               └── client.ts     # API client
-│
-└── infra/
-    ├── docker/                   # Dockerfiles
-    │   ├── api.Dockerfile
-    │   ├── worker.Dockerfile
-    │   └── dashboard.Dockerfile
-    ├── confluent/                # Confluent Cloud setup
-    │   ├── create-topics-kafka.js        # Topic creation via KafkaJS
-    │   ├── create-topics-api.js          # Topic creation via REST API
-    │   ├── register-schemas.sh           # Schema registration
-    │   ├── set-data-contracts.sh         # Data contracts
-    │   ├── verify-setup.js               # Verification script
-    │   ├── prepare-flink-sql.sh          # SQL file preparation
-    │   ├── SIMPLE_EXECUTION_GUIDE.md     # Quick start guide
-    │   ├── FLINK_EXECUTION_GUIDE.md      # Detailed Flink guide
-    │   └── DEPLOYMENT_CHECKLIST.md       # Deployment checklist
-    └── sql/
-        └── init.sql              # PostgreSQL seed data (optional)
-```
-
----
-
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 
 - **Node.js** >= 22.x
 - **npm** >= 10.x
-- **Confluent Cloud Account** (free trial available)
+- **Confluent Cloud** account (free trial available)
 - **Anthropic API Key** (for AI recommendations)
-- **IBM WatsonX API Key** (optional, for enhanced AI)
 
 ### 1. Clone and Install
 
@@ -557,73 +230,59 @@ cd SignalTwinAI
 npm run setup
 ```
 
-This runs `npm install` and builds `packages/core`, `packages/shared`, and `packages/schemas`.
-
 ### 2. Configure Environment
 
 ```bash
 cp .env.example .env
 ```
 
-Edit `.env` and set your credentials:
+Edit `.env` with your Confluent Cloud credentials:
 
 ```env
-# Confluent Cloud
-KAFKA_BOOTSTRAP_SERVERS=pkc-xxxxx.us-east-1.aws.confluent.cloud:9092
-KAFKA_API_KEY=your-api-key
-KAFKA_API_SECRET=your-api-secret
-SCHEMA_REGISTRY_URL=https://psrc-xxxxx.us-east-1.aws.confluent.cloud
-SCHEMA_REGISTRY_API_KEY=your-sr-key
-SCHEMA_REGISTRY_API_SECRET=your-sr-secret
+USE_CONFLUENT=cloud
+CONFLUENT_BOOTSTRAP_SERVERS=pkc-xxxxx.us-east-1.aws.confluent.cloud:9092
+CONFLUENT_API_KEY=your-api-key
+CONFLUENT_API_SECRET=your-api-secret
+CONFLUENT_SCHEMA_REGISTRY_URL=https://psrc-xxxxx.us-east-1.aws.confluent.cloud
+CONFLUENT_SCHEMA_REGISTRY_API_KEY=your-sr-key
+CONFLUENT_SCHEMA_REGISTRY_API_SECRET=your-sr-secret
 
-# AI Services
-ANTHROPIC_API_KEY=sk-ant-your-key-here
-WATSONX_API_KEY=your-watsonx-key (optional)
-WATSONX_PROJECT_ID=your-project-id (optional)
-
-# Application
-NODE_ENV=development
+ANTHROPIC_API_KEY=sk-ant-your-key
 API_PORT=3001
+VITE_API_URL=http://localhost:3001
 ```
 
 ### 3. Set Up Confluent Cloud
 
-#### Option A: Automated Setup (Recommended)
-
 ```bash
-# Create topics (27 topics: 14 retail + 13 fleet)
+# Create 27 topics
 npm run infra:topics
 
-# Register schemas (16 Avro schemas)
+# Register 16 Avro schemas
 npm run infra:schemas
 
-# Set data contracts (schema compatibility)
+# Set data contracts
 npm run infra:contracts
 ```
 
-#### Option B: Manual Setup
-
-Follow the guide: `infra/confluent/SIMPLE_EXECUTION_GUIDE.md`
-
 ### 4. Deploy Flink SQL Jobs
 
-1. Go to Confluent Cloud → Flink → SQL Workspace
-2. Select your compute pool
-3. Execute SQL files from `packages/streaming/flink-sql/prepared/` in order:
-   - `01-create-source-tables.sql` (5 tables)
-   - `02-clean-orders.sql` (cleansing)
-   - `03-clean-payments.sql` (validation)
-   - `04-customer-360.sql` (enrichment)
-   - `05-risk-signals.sql` (scoring)
-   - `06-decisions.sql` (routing)
-   - `10-fleet-source-tables.sql` (5 fleet tables)
-   - `11-fleet-metrics.sql` (aggregations)
-   - `12-fleet-risk-alerts.sql` (alerts)
-   - `13-fleet-agent-decisions.sql` (decisions)
+Go to **Confluent Cloud → Flink → SQL Workspace** and run in order:
 
-See detailed guide: `infra/confluent/FLINK_EXECUTION_GUIDE.md`
+| File | Purpose |
+|------|---------|
+| `prepared/01-create-source-tables.sql` | Source table definitions |
+| `prepared/02-clean-orders.sql` | Order validation |
+| `prepared/03-clean-payments.sql` | Payment validation |
+| `prepared/04-customer-360.sql` | Customer enrichment |
+| `prepared/05-risk-signals.sql` | Risk scoring |
+| `prepared/06-decisions.sql` | Decision routing |
+| `prepared/10-fleet-source-tables.sql` | Fleet source tables |
+| `prepared/11-fleet-metrics.sql` | Fleet aggregations |
+| `prepared/12-fleet-risk-alerts.sql` | Risk alert generation |
+| `prepared/13-fleet-agent-decisions.sql` | Agent decision routing |
 
-### 5. Start Application Services
+### 5. Start All Services
 
 ```bash
 npm run dev
@@ -631,647 +290,708 @@ npm run dev
 
 | Service | URL | Description |
 |---------|-----|-------------|
-| API | http://localhost:3001 | Fastify REST API + SSE streams |
-| Dashboard | http://localhost:5173 | React dashboard |
-| Worker | (background) | Event generators + AI agents |
-
-Open http://localhost:5173 to see the CTO hub with use case selector.
+| Dashboard | http://localhost:5173 | React UI |
+| API | http://localhost:3001 | REST + SSE |
+| Worker | (background) | Generators + AI Agents |
 
 ---
 
-## 🎯 Use Cases
-
-### 1. RetailOps Control Tower
-
-**E-commerce risk, fraud detection, and VIP retention with real-time customer signal correlation.**
-
-#### Topics (14)
-
-**Raw Layer:**
-- `retail.orders.raw` — Order events
-- `retail.payments.raw` — Payment transactions
-- `retail.support.raw` — Support tickets
-- `retail.shipments.raw` — Shipment tracking
-- `retail.customers.raw` — Customer profiles
-
-**Curated Layer:**
-- `retail.orders.clean` — Validated orders
-- `retail.payments.clean` — Validated payments
-- `retail.support.clean` — Categorized support
-- `retail.shipments.clean` — Enriched shipments
-
-**Enriched Layer:**
-- `retail.customer_360.enriched` — Customer 360 view
-
-**Signals Layer:**
-- `retail.risk.signals` — Risk scores
-
-**Decisions Layer:**
-- `retail.recommendations.decisions` — AI recommendations
-
-**Actions Layer:**
-- `retail.agent_actions.actions` — Operator actions
-
-**Audit Layer:**
-- `retail.inference.audit` — Audit trail
-
-#### Risk Scoring
-
-| Condition | Score | Signal |
-|-----------|-------|--------|
-| 2+ payment failures in 10 minutes | +30 | Potential fraud |
-| Shipment delayed for premium order | +20 | Churn risk |
-| Negative support event in 24 hours | +25 | Customer dissatisfaction |
-| Refund request after shipment issue | +15 | Service recovery needed |
-| VIP customer | +10 | High-value retention priority |
-| **Total > 60** | — | **Escalate to human review** |
-
-#### AI Agents (2)
-
-1. **Risk Scorer** — Real-time risk calculation based on multi-signal correlation
-2. **AI Recommendation Engine** — Claude-powered recommendations with PII redaction
-
-#### Dashboard Pages (7)
-
-- Dashboard — Overview with key metrics
-- Digital Twin — Real-time customer state
-- Governance — Schema registry, lineage, PII
-- Event Replay — Historical event playback
-- Live Events — Real-time event stream
-- Recommendations — AI-generated actions
-- Customers — Customer list and details
-
-#### Schemas (7)
-
-- `order-created.avsc` — Order events
-- `payment-failed.avsc` — Payment failures
-- `support-ticket-updated.avsc` — Support tickets
-- `shipment-delayed.avsc` — Shipment delays
-- `customer-profile-updated.avsc` — Customer profiles
-- `risk-signal-generated.avsc` — Risk signals
-- `ai-recommendation-created.avsc` — AI recommendations
+## Use Cases
 
 ---
 
-### 2. FleetOps Control Tower
+### 1. FleetOps Control Tower
 
-**Real-time logistics control tower with vehicle telemetry, cold-chain monitoring, and autonomous AI agents.**
+> **Real-time logistics control tower with vehicle telemetry, cold-chain monitoring, and 4 autonomous AI agents.**
 
-#### Overview
+#### How FleetOps Uses Confluent Cloud
 
-FleetOps is a comprehensive logistics operations platform that monitors vehicle fleets in real-time, detects anomalies, and provides autonomous AI-driven recommendations for route optimization, safety, maintenance, and cold-chain compliance.
+```mermaid
+flowchart TD
+    subgraph SOURCES["Data Sources"]
+        direction LR
+        S1["🚛 Vehicle ECU<br/>speed · fuel · engine"]
+        S2["📍 GPS Telematics<br/>location · heading"]
+        S3["🌡️ Reefer Unit<br/>temp · humidity · door"]
+        S4["👤 Driver App<br/>events · behavior"]
+        S5["📦 Order System<br/>deliveries · ETA"]
+    end
 
-#### Topics (13)
+    subgraph CC_KAFKA["Confluent Cloud — Kafka Topics"]
+        direction TB
+        T1["fleet.telemetry.raw"]
+        T2["fleet.location_updates.raw"]
+        T3["fleet.coldchain.raw"]
+        T4["fleet.driver_events.raw"]
+        T5["fleet.route_events.raw"]
+        T6["fleet.maintenance.raw"]
+        T7["fleet.order_events.raw"]
+        T8["fleet.support_events.raw"]
+        T9["fleet.metrics.live"]
+        T10["fleet.risk.alerts"]
+        T11["fleet.agent.decisions"]
+        T12["fleet.agent.actions"]
+        T13["fleet.audit.log"]
+    end
 
-**Raw Layer:**
-- `fleet.telemetry.raw` — Vehicle telemetry (speed, fuel, engine temp, GPS)
-- `fleet.location_updates.raw` — GPS location updates
-- `fleet.driver_events.raw` — Driver behavior (harsh braking, speeding, fatigue)
-- `fleet.order_events.raw` — Delivery order status
-- `fleet.route_events.raw` — Route planning and ETA updates
-- `fleet.coldchain.raw` — Refrigeration telemetry (temp, humidity, door status)
-- `fleet.maintenance.raw` — Vehicle health and fault codes
-- `fleet.support_events.raw` — Driver support requests
+    subgraph CC_FLINK["Confluent Cloud — Flink SQL Jobs"]
+        direction LR
+        F1["fleet-metrics<br/>Vehicle aggregations<br/>5-min windows"]
+        F2["fleet-risk-alerts<br/>Threshold detection<br/>breach · anomaly"]
+        F3["fleet-agent-decisions<br/>Decision routing<br/>to agent topics"]
+    end
 
-**Signals Layer:**
-- `fleet.metrics.live` — Real-time fleet metrics (aggregated)
-- `fleet.risk.alerts` — Risk alerts (safety, cold-chain, maintenance)
+    subgraph CC_GOV["Confluent Cloud — Stream Governance"]
+        direction LR
+        SL["⬡ Stream Lineage<br/>Producer → Topic → Flink<br/>→ Consumer visual graph"]
+        SR["Schema Registry<br/>9 Avro schemas"]
+        SC["Schema Compatibility<br/>BACKWARD · FULL"]
+    end
 
-**Decisions Layer:**
-- `fleet.agent.decisions` — AI agent recommendations
+    subgraph AGENTS["AI Agents — Worker Service"]
+        direction LR
+        A1["⏱ Delay Agent<br/>ETA drift detection<br/>→ REROUTE"]
+        A2["🌡 Cold Chain Agent<br/>Temp breach detection<br/>→ PRIORITY_DELIVERY"]
+        A3["🛡 Safety Agent<br/>Harsh braking · speed<br/>→ MANDATORY_REST"]
+        A4["🔧 Maintenance Agent<br/>Fault codes · engine<br/>→ VEHICLE_SWAP"]
+    end
 
-**Actions Layer:**
-- `fleet.agent.actions` — Operator/automated actions
+    subgraph DASHBOARD["CTO Dashboard"]
+        direction LR
+        D1["Control Tower<br/>Fleet overview"]
+        D2["Stream Lineage<br/>Live edge animation"]
+        D3["Governance<br/>Schema · PII · lineage"]
+        D4["Incidents<br/>Alert management"]
+    end
 
-**Audit Layer:**
-- `fleet.audit.log` — Complete audit trail
+    S1 --> T1
+    S2 --> T2
+    S3 --> T3
+    S4 --> T4
+    S5 --> T5
+    S1 --> T6
+
+    T1 --> F1
+    T2 --> F1
+    T5 --> F1
+    T3 --> F2
+    T4 --> F2
+    T6 --> F2
+    T7 --> F2
+    T8 --> F2
+    T1 --> F2
+
+    F1 --> T9
+    F2 --> T10
+
+    T9 --> A1
+    T10 --> A2
+    T10 --> A3
+    T10 --> A4
+
+    A1 --> T11
+    A2 --> T11
+    A3 --> T11
+    A4 --> T11
+
+    T11 --> T12
+    T11 --> T13
+
+    T11 --> DASHBOARD
+    T9 --> DASHBOARD
+
+    SL -.->|"auto-traces all flows"| DASHBOARD
+    SR -.->|"validates schema"| T1
+    SR -.->|"validates schema"| T3
+
+    style SOURCES fill:#f0f9ff,stroke:#0ea5e9,stroke-width:1px
+    style CC_KAFKA fill:#fef3c7,stroke:#f59e0b,stroke-width:2px
+    style CC_FLINK fill:#f3e8ff,stroke:#a855f7,stroke-width:2px
+    style CC_GOV fill:#f0fdf4,stroke:#22c55e,stroke-width:2px
+    style AGENTS fill:#fff1f2,stroke:#f43f5e,stroke-width:1px
+    style DASHBOARD fill:#f0f9ff,stroke:#0284c7,stroke-width:1px
+```
+
+#### Fleet Topics (13)
+
+| Layer | Topic | Description |
+|-------|-------|-------------|
+| Raw | `fleet.telemetry.raw` | Speed, fuel, engine temp, GPS |
+| Raw | `fleet.location_updates.raw` | GPS position updates |
+| Raw | `fleet.driver_events.raw` | Harsh braking, speeding, fatigue |
+| Raw | `fleet.order_events.raw` | Delivery order status |
+| Raw | `fleet.route_events.raw` | Route planning and ETA |
+| Raw | `fleet.coldchain.raw` | Refrigeration temp, humidity, door |
+| Raw | `fleet.maintenance.raw` | Fault codes, engine health |
+| Raw | `fleet.support_events.raw` | Driver support requests |
+| Signals | `fleet.metrics.live` | Aggregated real-time fleet metrics |
+| Signals | `fleet.risk.alerts` | Safety, cold-chain, maintenance alerts |
+| Decisions | `fleet.agent.decisions` | AI agent recommendations |
+| Actions | `fleet.agent.actions` | Executed operator/automated actions |
+| Audit | `fleet.audit.log` | Complete audit trail |
 
 #### AI Agents (4)
 
-##### 1. Delay Agent
+```mermaid
+graph LR
+    subgraph INPUTS["Input Topics"]
+        I1["fleet.route_events.raw"]
+        I2["fleet.telemetry.raw"]
+        I3["fleet.coldchain.raw"]
+        I4["fleet.driver_events.raw"]
+        I5["fleet.maintenance.raw"]
+        I6["fleet.risk.alerts"]
+    end
 
-**Purpose:** Monitors ETA drift and traffic anomalies
+    subgraph AGENTS["AI Agents"]
+        DA["⏱ Delay Agent<br/>ETA drift · traffic"]
+        CA["🌡 Cold Chain Agent<br/>Temp · humidity · door"]
+        SA["🛡 Safety Agent<br/>Braking · speed · fatigue"]
+        MA["🔧 Maintenance Agent<br/>Engine · fault codes"]
+    end
 
-**Input Topics:**
-- `fleet.route_events.raw` — Route and ETA data
-- `fleet.telemetry.raw` — Vehicle speed and location
+    subgraph DECISIONS["fleet.agent.decisions"]
+        D1["REROUTE"]
+        D2["PRIORITY_DELIVERY<br/>REJECT_SHIPMENT"]
+        D3["MANDATORY_REST<br/>DRIVER_COACHING"]
+        D4["VEHICLE_SWAP<br/>SCHEDULE_SERVICE"]
+    end
 
-**Detects:**
-- ETA drift > 10 minutes (warning)
-- ETA drift > 20 minutes (critical)
-- Traffic anomalies
-- Route deviations
+    I1 --> DA
+    I2 --> DA
+    I3 --> CA
+    I6 --> CA
+    I4 --> SA
+    I2 --> SA
+    I5 --> MA
+    I2 --> MA
 
-**Recommendations:**
-- Reroute via alternate path
-- Notify customer of delay
-- Escalate to dispatcher
-- Adjust delivery schedule
+    DA --> D1
+    CA --> D2
+    SA --> D3
+    MA --> D4
 
-**Example Decision:**
-```json
-{
-  "agent_type": "delay_agent",
-  "vehicle_id": "VEH-001",
-  "severity": "CRITICAL",
-  "recommendation": "REROUTE",
-  "reason": "ETA drift 25 minutes due to traffic",
-  "confidence": 0.92,
-  "suggested_action": "Take Highway 101 alternate route"
-}
+    style INPUTS fill:#fef3c7,stroke:#f59e0b,stroke-width:1px
+    style AGENTS fill:#fff1f2,stroke:#f43f5e,stroke-width:1px
+    style DECISIONS fill:#dcfce7,stroke:#22c55e,stroke-width:1px
 ```
 
-##### 2. Cold Chain Agent
+#### Risk Thresholds
 
-**Purpose:** Monitors refrigeration and ensures temperature compliance
+| Metric | Warning | Critical | Agent |
+|--------|---------|----------|-------|
+| ETA Drift | > 10 min | > 20 min | Delay Agent |
+| Temp Deviation | > 2°C | > 5°C | Cold Chain Agent |
+| Safety Score | < 70 | < 50 | Safety Agent |
+| Maintenance Risk | > 40 | > 70 | Maintenance Agent |
+| Engine Temp | > 100°C | > 110°C | Maintenance Agent |
+| Speed | > 110 km/h | > 130 km/h | Safety Agent |
 
-**Input Topics:**
-- `fleet.coldchain.raw` — Temperature, humidity, door events
+#### Example Decision
 
-**Detects:**
-- Temperature deviation > 2°C (warning)
-- Temperature deviation > 5°C (critical)
-- Door open > 5 minutes
-- Compressor failures
-- Humidity violations
-
-**Recommendations:**
-- Priority delivery (deliver before spoilage)
-- Reject shipment (temperature breach)
-- Service refrigeration unit
-- Notify quality control
-
-**Example Decision:**
 ```json
 {
   "agent_type": "coldchain_agent",
   "vehicle_id": "VEH-002",
   "severity": "CRITICAL",
   "recommendation": "PRIORITY_DELIVERY",
-  "reason": "Temperature 8°C above target for 12 minutes",
+  "reason": "Temperature +8°C above setpoint for 12 minutes",
   "confidence": 0.95,
   "suggested_action": "Deliver within 30 minutes or reject shipment"
 }
 ```
 
-##### 3. Safety Agent
-
-**Purpose:** Detects unsafe driving behavior and fatigue
-
-**Input Topics:**
-- `fleet.driver_events.raw` — Driving behavior
-- `fleet.telemetry.raw` — Speed, acceleration
-
-**Detects:**
-- Harsh braking (> 0.5g deceleration)
-- Speeding (> 110 km/h)
-- Rapid acceleration
-- Fatigue indicators (driving time > 8 hours)
-- Safety score < 70 (warning)
-- Safety score < 50 (critical)
-
-**Recommendations:**
-- Driver coaching
-- Mandatory rest break
-- Speed governor activation
-- Escalate to safety manager
-- Suspend driver (severe violations)
-
-**Example Decision:**
-```json
-{
-  "agent_type": "safety_agent",
-  "vehicle_id": "VEH-003",
-  "driver_id": "DRV-123",
-  "severity": "HIGH",
-  "recommendation": "MANDATORY_REST",
-  "reason": "3 harsh braking events + driving 9 hours",
-  "confidence": 0.88,
-  "suggested_action": "Require 30-minute rest break"
-}
-```
-
-##### 4. Maintenance Agent
-
-**Purpose:** Predicts vehicle failures and schedules maintenance
-
-**Input Topics:**
-- `fleet.maintenance.raw` — Fault codes, diagnostics
-- `fleet.telemetry.raw` — Engine health, mileage
-
-**Detects:**
-- Engine temperature > 100°C (warning)
-- Engine temperature > 110°C (critical)
-- Fault codes (check engine, ABS, transmission)
-- Oil pressure low
-- Brake wear indicators
-- Maintenance risk score > 40 (warning)
-- Maintenance risk score > 70 (critical)
-
-**Recommendations:**
-- Schedule preventive maintenance
-- Immediate service required
-- Vehicle swap (critical failure)
-- Order replacement parts
-- Reduce load/speed
-
-**Example Decision:**
-```json
-{
-  "agent_type": "maintenance_agent",
-  "vehicle_id": "VEH-004",
-  "severity": "CRITICAL",
-  "recommendation": "VEHICLE_SWAP",
-  "reason": "Engine temp 115°C + transmission fault code",
-  "confidence": 0.91,
-  "suggested_action": "Swap vehicle at next depot, schedule immediate service"
-}
-```
-
-#### Risk Thresholds
-
-| Metric | Warning | Critical |
-|--------|---------|----------|
-| ETA Drift | 10 minutes | 20 minutes |
-| Cold Chain Temp Deviation | 2°C | 5°C |
-| Safety Score | < 70 | < 50 |
-| Maintenance Risk | > 40 | > 70 |
-| Harsh Braking | 0.5g | 0.8g |
-| Overspeed | 110 km/h | 130 km/h |
-| Engine Temperature | 100°C | 110°C |
-
 #### Dashboard Pages (6)
 
-1. **Control Tower** — Real-time fleet overview
-   - Active vehicles map
-   - Fleet-wide metrics (on-time %, safety score, cold-chain compliance)
-   - Critical alerts feed
-   - Agent decision summary
-
-2. **Vehicles** — Vehicle list and status
-   - Filterable vehicle grid
-   - Status indicators (active, idle, maintenance, critical)
-   - Quick stats per vehicle
-   - Search and sort
-
-3. **Vehicle Detail** — Individual vehicle deep-dive
-   - Real-time telemetry dashboard
-   - Route map with ETA
-   - Cold-chain temperature graph
-   - Driver behavior timeline
-   - Maintenance history
-   - AI agent recommendations
-
-4. **Incidents** — Alert and incident management
-   - Active incidents list
-   - Incident timeline
-   - Severity filtering
-   - Resolution tracking
-   - Root cause analysis
-
-5. **AI Agents** — Agent performance dashboard
-   - Agent decision history
-   - Recommendation acceptance rate
-   - Confidence score distribution
-   - Agent effectiveness metrics
-   - Manual override tracking
-
-6. **Governance** — Fleet-specific governance
-   - Schema registry (9 schemas)
-   - Data lineage graph
-   - PII field inventory (vehicle IDs, GPS coordinates)
-   - Data contracts and compatibility
+| Page | Route | Description |
+|------|-------|-------------|
+| Control Tower | `/fleet` | Fleet overview, metrics, active incidents |
+| Vehicles | `/fleet/vehicles` | Vehicle grid with status indicators |
+| Vehicle Detail | `/fleet/vehicles/:id` | Telemetry, route, cold-chain, AI decisions |
+| Incidents | `/fleet/incidents` | Alert management and resolution tracking |
+| AI Agents | `/fleet/agents` | Agent decision history and effectiveness |
+| Stream Lineage | `/fleet/stream-lineage` | Live edge-animated lineage graph |
 
 #### Schemas (9)
 
-- `fleet-telemetry.avsc` — Vehicle telemetry
-- `fleet-driver-event.avsc` — Driver behavior
-- `fleet-route-event.avsc` — Route and ETA
-- `fleet-coldchain.avsc` — Refrigeration data
-- `fleet-maintenance.avsc` — Vehicle health
-- `fleet-audit-entry.avsc` — Audit trail
-- `fleet-agent-decision.avsc` — AI decisions
-- `location-update.avsc` — GPS updates
-- `fleet-order-event.avsc` — Delivery orders
+| Schema | Topic | Compatibility |
+|--------|-------|---------------|
+| `telemetry-event.avsc` | `fleet.telemetry.raw` | BACKWARD |
+| `location-update.avsc` | `fleet.location_updates.raw` | BACKWARD |
+| `driver-event.avsc` | `fleet.driver_events.raw` | BACKWARD |
+| `route-event.avsc` | `fleet.route_events.raw` | BACKWARD |
+| `coldchain-event.avsc` | `fleet.coldchain.raw` | **FULL** |
+| `maintenance-event.avsc` | `fleet.maintenance.raw` | BACKWARD |
+| `fleet-order-event.avsc` | `fleet.order_events.raw` | BACKWARD |
+| `fleet-risk-alert.avsc` | `fleet.risk.alerts` | FORWARD |
+| `fleet-agent-decision.avsc` | `fleet.agent.decisions` | **FULL** |
 
-#### Data Flow
+#### PII Fields
+
+| Field | Schema | Classification | Handling |
+|-------|--------|---------------|---------|
+| `vehicle_id` | driver-event | Quasi-identifier | MASK |
+| `lat`, `lng` | telemetry-event | Sensitive location | REDACT |
+| `lat`, `lng` | location-update | Sensitive location | REDACT |
+| `customer_name_hash` | fleet-order-event | Direct identifier | HASH |
+
+---
+
+### 2. RetailOps Control Tower
+
+> **E-commerce risk, fraud detection, and VIP retention with real-time customer signal correlation.**
+
+#### How RetailOps Uses Confluent Cloud
+
+```mermaid
+flowchart TD
+    subgraph SOURCES["Data Sources"]
+        direction LR
+        S1["🛒 Order Service<br/>purchase events"]
+        S2["💳 Payment Service<br/>transaction events"]
+        S3["🎧 Support CRM<br/>ticket events"]
+        S4["📦 Shipping System<br/>delivery events"]
+        S5["👤 Customer DB<br/>profile updates"]
+    end
+
+    subgraph CC_KAFKA["Confluent Cloud — Kafka Topics"]
+        direction TB
+        subgraph RAW["Raw Layer (5)"]
+            TR1["retail.orders.raw"]
+            TR2["retail.payments.raw"]
+            TR3["retail.support.raw"]
+            TR4["retail.shipments.raw"]
+            TR5["retail.customers.raw"]
+        end
+        subgraph CURATED["Curated Layer (4)"]
+            TC1["retail.orders.clean"]
+            TC2["retail.payments.clean"]
+            TC3["retail.support.clean"]
+            TC4["retail.shipments.clean"]
+        end
+        subgraph ENRICHED["Enriched Layer (1)"]
+            TE1["retail.customer_360.enriched"]
+        end
+        subgraph SIGNALS["Signals Layer (1)"]
+            TS1["retail.risk.signals"]
+        end
+        subgraph DECISIONS["Decisions Layer (1)"]
+            TD1["retail.recommendations.decisions"]
+        end
+        subgraph TAIL["Actions + Audit (2)"]
+            TA1["retail.agent_actions.actions"]
+            TA2["retail.inference.audit"]
+        end
+    end
+
+    subgraph CC_FLINK["Confluent Cloud — Flink SQL"]
+        direction LR
+        F1["02-clean-orders<br/>Validate · standardize"]
+        F2["03-clean-payments<br/>Validate · currency"]
+        F3["04-customer-360<br/>Temporal join"]
+        F4["05-risk-signals<br/>Windowed scoring<br/>10-min · 24-h windows"]
+        F5["06-decisions<br/>risk_summary view"]
+    end
+
+    subgraph AGENTS["AI Layer — Worker"]
+        A1["Risk Scorer<br/>Multi-signal correlation"]
+        A2["Recommendation Engine<br/>Claude API · audit hash"]
+    end
+
+    subgraph DASHBOARD["CTO Dashboard"]
+        D1["Retail Dashboard<br/>KPIs + live feed"]
+        D2["Stream Lineage<br/>Live edge animation"]
+        D3["Customer 360<br/>Digital twin"]
+        D4["Governance<br/>Schema · PII · contracts"]
+    end
+
+    S1 --> TR1
+    S2 --> TR2
+    S3 --> TR3
+    S4 --> TR4
+    S5 --> TR5
+
+    TR1 --> F1 --> TC1
+    TR2 --> F2 --> TC2
+    TC1 --> F3
+    TC2 --> F3
+    TR5 --> F3
+    F3 --> TE1
+    TE1 --> F4
+    TR3 --> F4
+    TR4 --> F4
+    F4 --> TS1
+
+    TS1 --> A1 --> A2
+    A2 --> TD1
+    TD1 --> TA1
+    TD1 --> TA2
+
+    TD1 --> DASHBOARD
+    TE1 --> DASHBOARD
+
+    style SOURCES fill:#f0f9ff,stroke:#0ea5e9,stroke-width:1px
+    style CC_KAFKA fill:#fef3c7,stroke:#f59e0b,stroke-width:2px
+    style CC_FLINK fill:#f3e8ff,stroke:#a855f7,stroke-width:2px
+    style AGENTS fill:#fff1f2,stroke:#f43f5e,stroke-width:1px
+    style DASHBOARD fill:#f0f9ff,stroke:#0284c7,stroke-width:1px
+    style RAW fill:#fff8f0,stroke:#f59e0b,stroke-width:1px
+    style CURATED fill:#fdf4ff,stroke:#a855f7,stroke-width:1px
+    style ENRICHED fill:#f0fdf4,stroke:#22c55e,stroke-width:1px
+    style SIGNALS fill:#fefce8,stroke:#eab308,stroke-width:1px
+    style DECISIONS fill:#dcfce7,stroke:#16a34a,stroke-width:1px
+    style TAIL fill:#f8fafc,stroke:#64748b,stroke-width:1px
+```
+
+#### Risk Scoring Model
+
+```mermaid
+graph LR
+    subgraph SIGNALS["Input Signals"]
+        S1["Payment failures<br/>in 10 minutes"]
+        S2["Shipment delayed<br/>on premium order"]
+        S3["Negative support<br/>in 24 hours"]
+        S4["Refund after<br/>shipment issue"]
+        S5["VIP customer<br/>flag"]
+    end
+
+    subgraph SCORE["Risk Score Computation"]
+        W1["+30 pts"]
+        W2["+20 pts"]
+        W3["+25 pts"]
+        W4["+15 pts"]
+        W5["+10 pts"]
+        SUM["Total Score<br/>0 – 100"]
+    end
+
+    subgraph ACTION["Action Decision"]
+        A1["Score > 60<br/>→ ESCALATE"]
+        A2["Score 30–60<br/>→ MONITOR"]
+        A3["Score < 30<br/>→ NO_ACTION"]
+    end
+
+    S1 --> W1
+    S2 --> W2
+    S3 --> W3
+    S4 --> W4
+    S5 --> W5
+
+    W1 --> SUM
+    W2 --> SUM
+    W3 --> SUM
+    W4 --> SUM
+    W5 --> SUM
+
+    SUM --> A1
+    SUM --> A2
+    SUM --> A3
+
+    style SIGNALS fill:#fef3c7,stroke:#f59e0b,stroke-width:1px
+    style SCORE fill:#f3e8ff,stroke:#a855f7,stroke-width:1px
+    style ACTION fill:#dcfce7,stroke:#22c55e,stroke-width:1px
+```
+
+#### Retail Topics (14)
+
+| Layer | Topic | Description |
+|-------|-------|-------------|
+| Raw | `retail.orders.raw` | Order creation events |
+| Raw | `retail.payments.raw` | Payment transactions |
+| Raw | `retail.support.raw` | Support ticket updates |
+| Raw | `retail.shipments.raw` | Shipment tracking events |
+| Raw | `retail.customers.raw` | Customer profile updates |
+| Curated | `retail.orders.clean` | Validated orders |
+| Curated | `retail.payments.clean` | Validated payments |
+| Curated | `retail.support.clean` | Categorised support |
+| Curated | `retail.shipments.clean` | Enriched shipments |
+| Enriched | `retail.customer_360.enriched` | Unified customer profile |
+| Signals | `retail.risk.signals` | Computed risk scores |
+| Decisions | `retail.recommendations.decisions` | AI recommendations |
+| Actions | `retail.agent_actions.actions` | Executed actions |
+| Audit | `retail.inference.audit` | AI inference audit trail |
+
+#### Dashboard Pages (7)
+
+| Page | Route | Description |
+|------|-------|-------------|
+| Dashboard | `/retail` | KPIs, live event feed, recommendations |
+| Digital Twin | `/retail/digital-twin` | Real-time customer state graph |
+| Stream Lineage | `/retail/stream-lineage` | Live edge-animated lineage |
+| Governance | `/retail/governance` | Schema, lineage, PII, contracts |
+| Event Replay | `/retail/replay` | Historical scenario playback |
+| Live Events | `/retail/events` | SSE event stream |
+| Customers | `/retail/customers` | Customer list + detail |
+
+---
+
+## Stream Lineage
+
+Stream Lineage visually traces every data flow — from producers and source connectors, through Kafka topics, Flink SQL jobs, and AI agents, to consumers and sink connectors — live and animated.
+
+```mermaid
+flowchart LR
+    subgraph PRODUCE["Producers"]
+        P1["Worker<br/>order-generator"]
+        P2["Worker<br/>fleet-telemetry"]
+    end
+
+    subgraph RAW_T["Raw Topics"]
+        R1["retail.orders.raw"]
+        R2["fleet.telemetry.raw"]
+    end
+
+    subgraph PROC["Flink SQL / Agents"]
+        FL["⚡ Flink SQL Job<br/>clean · enrich · score"]
+        AG["● AI Agent<br/>decision logic · Claude"]
+    end
+
+    subgraph SIG["Signal Topics"]
+        S1["retail.risk.signals"]
+        S2["fleet.risk.alerts"]
+    end
+
+    subgraph DEC["Decision Topics"]
+        D1["retail.recommendations.decisions"]
+        D2["fleet.agent.decisions"]
+    end
+
+    subgraph CONSUME["Consumers"]
+        C1["API Consumer<br/>retailops-api-state"]
+        C2["API Consumer<br/>fleetops-api-state"]
+    end
+
+    P1 -->|"live"| R1
+    P2 -->|"live"| R2
+    R1 -->|"Flink transform"| FL
+    R2 -->|"Flink aggregate"| FL
+    FL --> S1
+    FL --> S2
+    S1 --> AG
+    S2 --> AG
+    AG --> D1
+    AG --> D2
+    D1 -->|"SSE broadcast"| C1
+    D2 -->|"SSE broadcast"| C2
+
+    style PRODUCE fill:#dbeafe,stroke:#3b82f6,stroke-width:1px
+    style RAW_T fill:#fef3c7,stroke:#f59e0b,stroke-width:1px
+    style PROC fill:#f3e8ff,stroke:#a855f7,stroke-width:1px
+    style SIG fill:#fefce8,stroke:#eab308,stroke-width:1px
+    style DEC fill:#dcfce7,stroke:#22c55e,stroke-width:1px
+    style CONSUME fill:#ffe4e6,stroke:#f43f5e,stroke-width:1px
+```
+
+### Stream Lineage in Confluent Cloud
+
+Confluent Cloud automatically builds the Stream Lineage graph once data flows. No extra configuration needed.
 
 ```
-Vehicle Sensors → Telemetry Events → Kafka Topics → Flink Enrichment →
-Risk Alerts → AI Agents → Decisions → Operator Actions → Audit Log
+confluent.cloud → Cluster → ⬡ Stream Lineage
 ```
 
-**Example Flow:**
+| Confluent Cloud Shows | SignalTwinAI Shows |
+|-----------------------|-------------------|
+| Producer nodes (KafkaJS clients) | Worker generators |
+| Topic nodes with throughput stats | All 27 registered topics |
+| Flink SQL job nodes | 10 active Flink jobs |
+| Consumer group nodes | API consumer groups |
+| Live message counts per edge | `/retail/stream-lineage` live SSE |
 
-1. **Vehicle VEH-001** sends telemetry: `speed=85 km/h, engine_temp=105°C, fuel=45%`
-2. **Flink** aggregates metrics over 5-minute windows
-3. **Flink** detects: `engine_temp > 100°C` → generates risk alert
-4. **Maintenance Agent** consumes alert → analyzes historical data
-5. **Agent** recommends: `REDUCE_SPEED` with confidence 0.87
-6. **Operator** reviews recommendation → approves action
-7. **System** sends command to vehicle → logs to audit trail
+### Live Stream Lineage Dashboard
 
-#### PII and Compliance
-
-**PII Fields:**
-- `vehicle_id` — Quasi-identifier (masked)
-- `driver_id` — Quasi-identifier (masked)
-- `lat`, `lng` — Sensitive location data (redacted in AI prompts)
-- `customer_name_hash` — Direct identifier (hashed)
-
-**Data Contracts:**
-- All schemas use **BACKWARD** compatibility (safe field additions)
-- Cold-chain schema uses **FULL** compatibility (critical for compliance)
-- Agent decision schema uses **FULL** compatibility (audit requirements)
-
-#### Integration Points
-
-**External Systems:**
-- **Fleet Management System** — Vehicle registration, driver assignments
-- **Route Planning API** — Traffic data, alternate routes
-- **Maintenance System** — Service scheduling, parts inventory
-- **Customer Notification** — SMS/email for delivery updates
-- **Telematics Provider** — Real-time vehicle data feed
-
-**APIs:**
-- `GET /api/fleet/vehicles` — List all vehicles
-- `GET /api/fleet/vehicles/:id` — Vehicle details
-- `GET /api/fleet/incidents` — Active incidents
-- `GET /api/fleet/agents` — AI agent status
-- `POST /api/fleet/actions` — Execute operator action
-- `GET /api/fleet/metrics` — Fleet-wide metrics
+| URL | Scope |
+|-----|-------|
+| `/retail/stream-lineage` | Retail domain — live animated graph |
+| `/fleet/stream-lineage` | Fleet domain — live animated graph |
+| Governance → Stream Lineage tab | All domains combined |
 
 ---
 
-### 3. FinGuard (Definition Ready)
+## Governance
 
-**Financial fraud detection and AML compliance.**
+### CTO Core Engine
 
-- 12 topics (transactions, accounts, alerts, compliance)
-- 3 AI agents (fraud detector, AML monitor, risk assessor)
-- 8 schemas
+Every domain registers one definition file. The governance layer, API routes, and dashboard automatically discover all registered domains:
 
-### 4. CareFlow (Definition Ready)
+```mermaid
+graph TB
+    subgraph REGISTRY["Use Case Registry — packages/core"]
+        direction LR
+        DEF1["FleetOps Definition<br/>13 topics · 4 agents<br/>9 schemas · 4 PII fields"]
+        DEF2["RetailOps Definition<br/>14 topics · 2 agents<br/>7 schemas · 7 PII fields"]
+        DEF3["FinGuard · CareFlow<br/>GridWatch · NetPulse<br/>FactoryGuardian"]
+    end
 
-**Healthcare patient monitoring and care coordination.**
+    subgraph FUNCTIONS["Generated From Registry"]
+        direction LR
+        F1["getCrossdomainLineage()"]
+        F2["getPIIReport()"]
+        F3["getDataContracts()"]
+        F4["getGovernanceMetrics()"]
+    end
 
-- 15 topics (vitals, medications, appointments, alerts)
-- 5 AI agents (vitals monitor, medication checker, care coordinator, emergency detector, readmission predictor)
-- 10 schemas
+    subgraph OUTPUTS["Auto-Discovered By"]
+        direction LR
+        O1["API Routes<br/>/governance/*"]
+        O2["Dashboard<br/>Governance Page"]
+        O3["Stream Lineage<br/>Lineage Graph"]
+    end
 
-### 5. GridWatch (Definition Ready)
+    REGISTRY --> FUNCTIONS
+    FUNCTIONS --> OUTPUTS
 
-**Energy grid monitoring and demand forecasting.**
-
-- 11 topics (meter readings, grid events, outages, forecasts)
-- 3 AI agents (demand forecaster, outage predictor, load balancer)
-- 7 schemas
-
-### 6. NetPulse (Definition Ready)
-
-**Telecom network health and customer experience.**
-
-- 14 topics (network events, customer complaints, service quality)
-- 4 AI agents (network optimizer, churn predictor, QoS monitor, incident resolver)
-- 9 schemas
-
-### 7. FactoryGuardian (Definition Ready)
-
-**Manufacturing quality control and predictive maintenance.**
-
-- 13 topics (sensor data, quality metrics, maintenance, production)
-- 4 AI agents (quality inspector, maintenance predictor, production optimizer, safety monitor)
-- 8 schemas
-
----
-
-## 🎛️ CTO Core Engine
-
-The core engine (`packages/core`) provides a **Use Case Registry** — a simple data structure where each domain registers its complete definition:
-
-```typescript
-interface UseCaseDefinition {
-  domain: string;              // 'retail' | 'fleet' | 'finguard' | ...
-  displayName: string;         // 'RetailOps Control Tower'
-  description: string;         // Use case description
-  entityIdField: string;       // 'customer_id' | 'vehicle_id' | ...
-  accentColor: string;         // UI theme color
-  icon: string;                // UI icon
-  topics: DomainTopics;        // raw, curated, enriched, signals, decisions, actions, audit
-  scoring: ScoringConfig;      // input topics, weights, escalation threshold
-  agents: AgentConfig[];       // AI agent definitions
-  lineage: LineageDefinition;  // nodes + edges for governance graph
-  schemas: SchemaMapping[];    // schema-to-topic with compatibility levels
-  piiFields: PIIFieldMapping[];// field-level PII classification + handling
-}
+    style REGISTRY fill:#f0f9ff,stroke:#0ea5e9,stroke-width:1px
+    style FUNCTIONS fill:#f3e8ff,stroke:#a855f7,stroke-width:1px
+    style OUTPUTS fill:#dcfce7,stroke:#22c55e,stroke-width:1px
 ```
 
-Adding a new use case requires **one definition file**. The governance layer, API routes, and dashboard automatically discover and display all registered domains.
+### Governance Dashboard
 
-### Governance Functions
-
-The core engine generates governance data from the registry:
-
-- `getCrossdomainLineage()` — Merged lineage graph across all domains
-- `getLineageForDomain(domain)` — Domain-specific lineage
-- `getPIIReport()` — PII field inventory across all schemas
-- `getDataContracts()` — Compatibility rules per topic
-- `getGovernanceMetrics()` — Counts: domains, topics, schemas, PII fields
-
----
-
-## 🛡️ Governance Dashboard
-
-The governance page is the demo centerpiece — a unified view across all domains with 4 sections:
-
-### 1. Stream Catalog
-
-All 27+ topics across all domains, filterable by:
-- Domain (retail, fleet, finguard, etc.)
-- Layer (raw, curated, enriched, signals, decisions, actions, audit)
-- Search by topic name
-
-### 2. Data Lineage
-
-Cross-domain lineage graph with:
-- Domain-colored nodes
-- Hover highlighting
-- Domain filter
-- Processor labels on edges
-- Interactive zoom and pan
-
-### 3. Schema Registry
-
-Schema browser with:
-- PII classification badges (DIRECT, QUASI, SENSITIVE)
-- Handling tags (HASH, MASK, REDACT, ENCRYPT)
-- Compatibility levels (BACKWARD, FORWARD, FULL, NONE)
-- Schema version history
-- Field-level documentation
-
-### 4. Compliance
-
-Governance metrics overview:
-- Total domains, topics, schemas
-- PII field inventory
-- Data contract compatibility rules
-- Schema evolution tracking
-- Audit trail statistics
+| Tab | Route | Contents |
+|-----|-------|----------|
+| Stream Catalog | Governance → Catalog | All 27+ topics, filterable by domain and layer |
+| Stream Lineage | Governance → Stream Lineage | Live animated lineage graph |
+| Data Lineage | Governance → Lineage | Static SVG lineage graph |
+| Schema Registry | Governance → Schemas | PII tags, compatibility levels, field docs |
+| Compliance | Governance → Compliance | PII inventory, contracts, audit stats |
+| Flink Jobs | Governance → Flink | Running jobs, inputs, outputs |
 
 ---
 
-## 🔌 API Endpoints
+## API Endpoints
 
-### Health & Metrics
+### Health
 - `GET /health` — Health check
 
-### Events & Streaming
+### Events
 - `GET /events/stream` — SSE stream of all events
-- `GET /events/domain/:domain` — Domain-filtered event stream
+- `GET /recommendations/stream` — SSE stream of AI recommendations
 
-### Recommendations
-- `GET /recommendations` — All AI recommendations
-- `GET /recommendations/:customerId` — Customer-specific recommendations
+### Governance
+- `GET /governance/domains` — Registered domain summaries
+- `GET /governance/lineage` — Cross-domain lineage graph
+- `GET /governance/lineage/:domain` — Domain-scoped lineage
+- `GET /governance/lineage/stats` — Live per-topic throughput
+- `GET /governance/lineage/stream` — SSE: `lineage-msg` + `lineage-stats`
+- `GET /governance/topics` — All topics with metadata
+- `GET /governance/topics/:domain` — Domain topics
+- `GET /governance/schemas` — Schema Registry subjects
+- `GET /governance/schemas/:subject` — Schema detail
+- `GET /governance/pii` — PII field inventory
+- `GET /governance/contracts` — Data contracts
+- `GET /governance/metrics` — Governance metrics
+- `GET /governance/agents` — AI agent definitions
 
-### Customers (Retail)
-- `GET /customers` — Customer list
-- `GET /customers/:id` — Customer details
-
-### Fleet Operations
+### Fleet
 - `GET /fleet/vehicles` — Vehicle list
-- `GET /fleet/vehicles/:id` — Vehicle details
+- `GET /fleet/vehicles/:id` — Vehicle detail
 - `GET /fleet/incidents` — Active incidents
 - `GET /fleet/agents` — AI agent status
-- `POST /fleet/actions` — Execute operator action
+
+### Retail
+- `GET /customers` — Customer list
+- `GET /customers/:id` — Customer detail
+- `GET /recommendations` — AI recommendations
 
 ### Actions
 - `POST /actions` — Execute operator action
 
-### Governance (11 endpoints)
-- `GET /governance/metrics` — Governance metrics
-- `GET /governance/lineage` — Cross-domain lineage
-- `GET /governance/lineage/:domain` — Domain lineage
-- `GET /governance/pii` — PII report
-- `GET /governance/contracts` — Data contracts
-- `GET /governance/catalog` — Stream catalog
-- `GET /governance/catalog/:domain` — Domain catalog
-- `GET /governance/schemas` — All schemas
-- `GET /governance/schemas/:domain` — Domain schemas
-- `GET /governance/audit` — Audit trail
-- `GET /governance/compliance` — Compliance report
-
 ### Copilot
-- `POST /copilot/chat` — AI copilot chat
-
-### Replay
-- `POST /replay/start` — Start event replay
-- `POST /replay/stop` — Stop event replay
-- `GET /replay/status` — Replay status
+- `POST /api/copilot/chat` — AI copilot chat
 
 ---
 
-## 🧪 Testing
+## Repository Structure
 
-### Run Tests
+```
+SignalTwinAI/
+├── packages/
+│   ├── core/                     # CTO Core Engine
+│   │   └── src/
+│   │       ├── types.ts          # UseCaseDefinition, LineageNode, TopicStats
+│   │       ├── use-case-registry.ts  # Domain registration
+│   │       ├── governance.ts     # Lineage, PII, data contracts
+│   │       └── definitions/
+│   │           ├── fleet.ts      # FleetOps definition
+│   │           ├── retail.ts     # RetailOps definition
+│   │           └── ...           # Other domain definitions
+│   ├── shared/                   # Types, constants, Kafka client
+│   ├── schemas/avro/             # 16 Avro schema files
+│   └── streaming/flink-sql/      # 10 Flink SQL scripts
+│       └── prepared/             # Pre-configured for Confluent Cloud
+│
+├── apps/
+│   ├── api/src/
+│   │   ├── routes/               # REST + SSE endpoints
+│   │   └── services/
+│   │       ├── lineage-tracker.ts    # Live throughput tracking
+│   │       ├── kafka-consumer.ts     # Multi-topic consumer
+│   │       └── sse-manager.ts        # SSE broadcast channels
+│   ├── worker/src/
+│   │   ├── generators/           # Mock event generators
+│   │   └── processors/           # AI agent implementations
+│   └── dashboard/src/
+│       ├── pages/
+│       │   ├── StreamLineagePage.tsx  # Live lineage view
+│       │   ├── GovernancePage.tsx
+│       │   └── fleet/
+│       └── components/
+│
+├── infra/confluent/              # Confluent Cloud setup scripts
+├── test-stream-lineage.js        # E2E lineage test
+├── STREAM_LINEAGE.md             # Lineage implementation guide
+└── CONFLUENT_SETUP.md            # Confluent Cloud setup guide
+```
+
+---
+
+## Testing
 
 ```bash
+# Run all tests
 npm test
+
+# E2E Stream Lineage test (requires API running)
+node test-stream-lineage.js
+
+# Verify Confluent Cloud setup
+node infra/confluent/verify-setup.js
 ```
 
-### Manual Testing
+### Manual Testing Checklist
 
-1. **Start services**: `npm run dev`
-2. **Open dashboard**: http://localhost:5173
-3. **Select use case**: RetailOps or FleetOps
-4. **Watch live events**: Events stream in real-time
-5. **Check governance**: View lineage, schemas, PII
-6. **Test AI agents**: See recommendations appear
-7. **Execute actions**: Approve/reject recommendations
-
----
-
-## 📊 Monitoring
-
-### Confluent Cloud
-
-- **Topics**: Monitor partition count, replication, retention
-- **Flink Jobs**: Check job status, backpressure, checkpoints
-- **Schema Registry**: Track schema versions, compatibility
-- **Metrics**: Throughput, latency, consumer lag
-
-### Application Metrics
-
-- **API**: Request rate, response time, error rate
-- **Worker**: Event processing rate, AI latency
-- **Dashboard**: Active connections, SSE streams
+1. `npm run dev` — start all services
+2. Open http://localhost:5173 → select **FleetOps**
+3. Watch live events on the Control Tower dashboard
+4. Navigate to `/fleet/stream-lineage` — observe edges animate green as messages flow
+5. Click any topic node — see upstream/downstream and live msg/s
+6. Open Confluent Cloud → **⬡ Stream Lineage** — verify the same topology appears
 
 ---
 
-## 🚢 Deployment
+## Documentation
 
-### Docker Compose (Local)
-
-```bash
-docker compose up -d
-```
-
-### Kubernetes (Production)
-
-See `infra/k8s/` for Kubernetes manifests (coming soon).
-
-### Confluent Cloud (Recommended)
-
-1. Create Kafka cluster
-2. Create Flink compute pool
-3. Deploy Flink SQL jobs
-4. Deploy application services (API, Worker, Dashboard)
+| File | Contents |
+|------|----------|
+| `CONFLUENT_SETUP.md` | Confluent Cloud credentials and topic setup |
+| `STREAM_LINEAGE.md` | Stream Lineage implementation and Confluent Cloud guide |
+| `DATA_FLOW_GUIDE.md` | Detailed data flow for each domain |
+| `ARCHITECTURE_FLOW_DIAGRAM.md` | Full architecture diagrams |
+| `infra/confluent/FLINK_EXECUTION_GUIDE.md` | Flink SQL step-by-step |
+| `infra/confluent/DEPLOYMENT_CHECKLIST.md` | Production deployment checklist |
 
 ---
 
-## 📚 Documentation
-
-- **Architecture**: `ARCHITECTURE_FLOW_DIAGRAM.md`
-- **Confluent Setup**: `CONFLUENT_SETUP.md`
-- **Data Flow**: `DATA_FLOW_GUIDE.md`
-- **Flink Execution**: `infra/confluent/FLINK_EXECUTION_GUIDE.md`
-- **Simple Guide**: `infra/confluent/SIMPLE_EXECUTION_GUIDE.md`
-- **Deployment Checklist**: `infra/confluent/DEPLOYMENT_CHECKLIST.md`
-- **WatsonX Integration**: `WATSONX.md`
-- **Claude Integration**: `CLAUDE.md`
-
----
-
-## 🤝 Contributing
-
-Contributions welcome! Please read `CONTRIBUTING.md` for guidelines.
-
----
-
-## 📄 License
-
-MIT License - see `LICENSE` file for details.
-
----
-
-## 🙏 Acknowledgments
+## Acknowledgments
 
 Built for the **2026 Confluent Hackathon** using:
-- Confluent Cloud (Kafka + Flink + Schema Registry)
-- Anthropic Claude API
-- IBM WatsonX
-- React 19 + Vite + Tailwind CSS v4
-- Node.js 22 + Fastify 5
+
+- **Confluent Cloud** — Kafka · Flink SQL · Schema Registry · Stream Lineage · Stream Governance
+- **Anthropic Claude** — AI recommendations and copilot
+- **IBM WatsonX** — Enhanced AI processing
+- **React 19 + Vite + Tailwind CSS v4** — Dashboard
+- **Node.js 22 + Fastify 5 + TypeScript** — API and worker
 
 ---
 
-## 📞 Support
-
-For questions or issues:
-- Open a GitHub issue
-- Contact: [your-email]
-- Slack: [your-slack-channel]
-
----
-
-**CTO — Control Tower Orchestra**  
-*The control tower for the AI era.*
+**CTO — Control Tower Orchestra** · *The control tower for the AI era.*

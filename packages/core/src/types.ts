@@ -28,21 +28,57 @@ export interface AgentConfig {
   consumerGroup: string;
 }
 
+export type LineageNodeType =
+  | 'producer'
+  | 'source_connector'
+  | 'topic'
+  | 'ksql_stream'
+  | 'ksql_table'
+  | 'flink_job'
+  | 'consumer'
+  | 'sink_connector'
+  | 'ai_agent';
+
 export interface LineageNode {
   id: string;
   layer: string;
   domain: string;
+  /** Logical node type — drives icon and colour in the Stream Lineage view */
+  nodeType?: LineageNodeType;
+  /** Human-friendly label (defaults to id if absent) */
+  label?: string;
+  /** Consumer group that reads this topic (for consumer nodes) */
+  consumerGroup?: string;
 }
 
 export interface LineageEdge {
   from: string;
   to: string;
   processor?: string;
+  /** Whether the edge carries live-observable data (shown as animated in the UI) */
+  live?: boolean;
 }
 
 export interface LineageDefinition {
   nodes: LineageNode[];
   edges: LineageEdge[];
+}
+
+/** Live per-topic throughput + consumer-group lag snapshot */
+export interface TopicStats {
+  topic: string;
+  domain: string;
+  layer: string;
+  messagesIn: number;   // total since API start
+  messagesOut: number;  // total since API start
+  msgPerSec: number;    // rolling 10-second window
+  consumerGroups: { groupId: string; lag: number }[];
+  lastUpdated: number;  // epoch ms
+}
+
+export interface LineageStatsResponse {
+  topics: TopicStats[];
+  generatedAt: number;
 }
 
 export interface SchemaMapping {

@@ -73,9 +73,36 @@ export interface Customer360 {
   active_recommendations: AIRecommendationCreated[];
 }
 
+export type LineageNodeType =
+  | 'producer'
+  | 'source_connector'
+  | 'topic'
+  | 'ksql_stream'
+  | 'ksql_table'
+  | 'flink_job'
+  | 'consumer'
+  | 'sink_connector'
+  | 'ai_agent';
+
 export interface LineageData {
-  nodes: { id: string; layer: string; domain: string }[];
-  edges: { from: string; to: string; processor?: string }[];
+  nodes: { id: string; layer: string; domain: string; nodeType?: LineageNodeType; label?: string; consumerGroup?: string }[];
+  edges: { from: string; to: string; processor?: string; live?: boolean }[];
+}
+
+export interface TopicStats {
+  topic: string;
+  domain: string;
+  layer: string;
+  messagesIn: number;
+  messagesOut: number;
+  msgPerSec: number;
+  consumerGroups: { groupId: string; lag: number }[];
+  lastUpdated: number;
+}
+
+export interface LineageStatsResponse {
+  topics: TopicStats[];
+  generatedAt: number;
 }
 
 export interface GovernanceDomain {

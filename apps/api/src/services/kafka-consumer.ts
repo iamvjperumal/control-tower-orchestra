@@ -9,6 +9,8 @@ import {
 } from '@signaltwin/shared';
 import { stateStore } from './state-store.js';
 import { eventSSE, recommendationSSE } from './sse-manager.js';
+import { lineageTracker } from './lineage-tracker.js';
+import { lineageSSE } from './sse-manager.js';
 
 let consumer: Consumer;
 
@@ -33,6 +35,11 @@ export async function startConsumer(): Promise<void> {
     eachMessage: async ({ topic, message }) => {
       if (!message.value) return;
       const data = JSON.parse(message.value.toString());
+
+      // Track message for live lineage stats
+      lineageTracker.record(topic);
+      // Broadcast a lightweight delta so the UI can pulse the relevant edge
+      lineageSSE.broadcast('lineage-msg', { topic, ts: Date.now() });
 
       if (topic === TOPICS.RAW_CUSTOMERS) {
         stateStore.updateCustomerProfile(data as CustomerProfileUpdated);

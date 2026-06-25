@@ -5,6 +5,7 @@ import { CustomerDetailPage } from './pages/CustomerDetailPage';
 import { GovernancePage } from './pages/GovernancePage';
 import { ReplayPage } from './pages/ReplayPage';
 import { DigitalTwinPage } from './pages/DigitalTwinPage';
+import { StreamLineagePage } from './pages/StreamLineagePage';
 import { CopilotPanel } from './components/CopilotPanel';
 import { FleetDashboardPage } from './pages/fleet/FleetDashboardPage';
 import { FleetVehicleDetailPage } from './pages/fleet/FleetVehicleDetailPage';
@@ -140,6 +141,7 @@ function PageHeader({ titles, badgeLabel, badgeColor, badgeBg }: {
 const RETAIL_NAV: NavItem[] = [
   { to: '/retail', label: 'Dashboard', icon: <GridIcon /> },
   { to: '/retail/digital-twin', label: 'Digital Twin', icon: <TwinIcon /> },
+  { to: '/retail/stream-lineage', label: 'Stream Lineage', icon: <LineageNavIcon /> },
   { to: '/retail/governance', label: 'Governance', icon: <ShieldIcon /> },
   { to: '/retail/replay', label: 'Event Replay', icon: <PlayIcon /> },
   { to: '/retail/events', label: 'Live Events', icon: <ActivityIcon /> },
@@ -150,6 +152,7 @@ const RETAIL_NAV: NavItem[] = [
 const RETAIL_TITLES: Record<string, string> = {
   '/retail': 'Dashboard',
   '/retail/governance': 'Governance',
+  '/retail/stream-lineage': 'Stream Lineage',
   '/retail/events': 'Live Events',
   '/retail/recommendations': 'Recommendations',
   '/retail/customers': 'Customers',
@@ -193,6 +196,7 @@ const FLEET_NAV: NavItem[] = [
   { to: '/fleet/vehicles', label: 'Vehicles', icon: <TruckIcon /> },
   { to: '/fleet/incidents', label: 'Incidents', icon: <AlertIcon /> },
   { to: '/fleet/agents', label: 'AI Agents', icon: <BrainIcon /> },
+  { to: '/fleet/stream-lineage', label: 'Stream Lineage', icon: <LineageNavIcon /> },
   { to: '/fleet/governance', label: 'Governance', icon: <ShieldIcon /> },
   { to: '/fleet/replay', label: 'Event Replay', icon: <PlayIcon /> },
 ];
@@ -202,6 +206,7 @@ const FLEET_TITLES: Record<string, string> = {
   '/fleet/vehicles': 'Fleet Vehicles',
   '/fleet/incidents': 'Incidents',
   '/fleet/agents': 'AI Agents',
+  '/fleet/stream-lineage': 'Stream Lineage',
   '/fleet/governance': 'Governance',
   '/fleet/replay': 'Event Replay',
 };
@@ -248,6 +253,7 @@ export default function App() {
           <Route index element={<DashboardPage />} />
           <Route path="customers/:id" element={<CustomerDetailPage />} />
           <Route path="governance" element={<GovernancePage />} />
+          <Route path="stream-lineage" element={<StreamLineagePage domain="retail" />} />
           <Route path="replay" element={<ReplayPage />} />
           <Route path="digital-twin" element={<DigitalTwinPage />} />
           <Route path="events" element={<DashboardPage />} />
@@ -261,6 +267,7 @@ export default function App() {
           <Route path="vehicles/:id" element={<FleetVehicleDetailPage />} />
           <Route path="incidents" element={<FleetIncidentsPage />} />
           <Route path="agents" element={<FleetAgentsPage />} />
+          <Route path="stream-lineage" element={<StreamLineagePage domain="fleet" />} />
           <Route path="governance" element={<FleetGovernancePage />} />
           <Route path="replay" element={<ReplayPage />} />
         </Route>
@@ -545,3 +552,12 @@ function BrainIcon() {
     </svg>
   );
 }
+function LineageNavIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="5" cy="12" r="2" /><circle cx="19" cy="6" r="2" /><circle cx="19" cy="18" r="2" />
+      <line x1="7" y1="11" x2="17" y2="7" /><line x1="7" y1="13" x2="17" y2="17" />
+    </svg>
+  );
+}
+

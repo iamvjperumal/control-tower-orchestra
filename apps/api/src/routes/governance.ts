@@ -11,6 +11,8 @@ import {
   getDataContracts,
   getGovernanceMetrics,
 } from '@signaltwin/core';
+import { lineageTracker } from '../services/lineage-tracker.js';
+import { lineageSSE } from '../services/sse-manager.js';
 
 export async function governanceRoutes(app: FastifyInstance): Promise<void> {
   app.get('/governance/domains', async () => {
@@ -62,6 +64,48 @@ export async function governanceRoutes(app: FastifyInstance): Promise<void> {
 
   app.get('/governance/lineage', async () => {
     return getCrossdomainLineage();
+  });
+
+  /**
+   * GET /governance/lineage/stats
+   * Returns live per-topic throughput and consumer-group lag.
+   * Confluent Cloud: the lag values are populated as messages flow; on a
+   * fresh cluster they will all be 0 until data is produced.
+   */
+  app.get('/governance/lineage/stats', async () => {
+    return lineageTracker.getStats();
+  });
+
+  /**
+   * GET /governance/lineage/stream
+   * SSE endpoint that pushes a "lineage-msg" event for every Kafka message
+   * received on any subscribed topic.  The dashboard uses this to animate
+   * edges in the Stream Lineage view.
+   *
+   * Event shape: { topic: string; ts: number }
+   *
+   * Also pushes a full "lineage-stats" snapshot every 5 seconds so the UI
+   * can update throughput counters even when the tab is idle.
+   */
+  app.get('/governance/lineage/stream', async (_request, reply) => {
+    const id = lineageSSE.addClient(reply);
+
+    // Send initial snapshot immediately
+    const snapshot = lineageTracker.getStats();
+    reply.raw.write(`event: lineage-stats\ndata: ${JSON.stringify(snapshot)}\n\n`);
+
+    // Push a full stats snapshot every 5 s
+    const interval = setInterval(() => {
+      const stats = lineageTracker.getStats();
+      reply.raw.write(`event: lineage-stats\ndata: ${JSON.stringify(stats)}\n\n`);
+    }, 5_000);
+
+    reply.raw.on('close', () => {
+      clearInterval(interval);
+    });
+
+    // Keep Fastify from closing the response
+    await new Promise(() => {});
   });
 
   app.get<{ Params: { domain: string } }>('/governance/lineage/:domain', async (request) => {
